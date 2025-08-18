@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -168,11 +169,15 @@ public class ClaimCommand extends CommandHandler
             @Nullable UUID ownerId)
     {
         World world = player.getWorld();
+        // TODO: Use config value
+        var expires = LocalDateTime.now().plusDays(2);
         CreateClaimResult result = plugin.dataStore.createClaim(world,
                 lesser.getBlockX(), greater.getBlockX(),
                 lesser.getBlockY() - plugin.config_claims_claimsExtendIntoGroundDistance - 1,
                 world.getHighestBlockYAt(greater) - plugin.config_claims_claimsExtendIntoGroundDistance - 1,
                 lesser.getBlockZ(), greater.getBlockZ(),
+                player.getLocation(),
+                expires,
                 ownerId, null, null, player);
         if (!result.succeeded || result.claim == null)
         {

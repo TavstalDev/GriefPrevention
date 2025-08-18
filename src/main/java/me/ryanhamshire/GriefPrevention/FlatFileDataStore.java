@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -277,6 +278,14 @@ public class FlatFileDataStore extends DataStore
                         line = inStream.readLine();
                         Location greaterBoundaryCorner = this.locationFromString(line, validWorlds);
 
+                        // core block
+                        line = inStream.readLine();
+                        Location coreBlockLocation = this.locationFromString(line, validWorlds);
+
+                        // expire date
+                        line = inStream.readLine();
+                        LocalDateTime expireDate = LocalDateTime.parse(line);
+
                         //third line is owner name
                         line = inStream.readLine();
                         String ownerName = line;
@@ -341,7 +350,7 @@ public class FlatFileDataStore extends DataStore
                         if (topLevelClaim == null)
                         {
                             //instantiate
-                            topLevelClaim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, ownerID, builderNames, containerNames, accessorNames, managerNames, claimID);
+                            topLevelClaim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, ownerID, builderNames, containerNames, accessorNames, managerNames, claimID);
 
                             topLevelClaim.modifiedDate = new Date(files[i].lastModified());
                             this.addClaim(topLevelClaim, false);
@@ -350,7 +359,7 @@ public class FlatFileDataStore extends DataStore
                         //otherwise there's already a top level claim, so this must be a subdivision of that top level claim
                         else
                         {
-                            Claim subdivision = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, null, builderNames, containerNames, accessorNames, managerNames, null);
+                            Claim subdivision = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, null, builderNames, containerNames, accessorNames, managerNames, null);
 
                             subdivision.modifiedDate = new Date(files[i].lastModified());
                             subdivision.parent = topLevelClaim;
@@ -492,6 +501,8 @@ public class FlatFileDataStore extends DataStore
         //boundaries
         Location lesserBoundaryCorner = this.locationFromString(yaml.getString("Lesser Boundary Corner"), validWorlds);
         Location greaterBoundaryCorner = this.locationFromString(yaml.getString("Greater Boundary Corner"), validWorlds);
+        Location coreBlockLocation = this.locationFromString(yaml.getString("Core Block Location"), validWorlds);
+        LocalDateTime expireDate = LocalDateTime.parse(yaml.getString("Expires"));
 
         //owner
         String ownerIdentifier = yaml.getString("Owner");
@@ -522,7 +533,7 @@ public class FlatFileDataStore extends DataStore
         out_parentID.add(yaml.getLong("Parent Claim ID", -1L));
 
         //instantiate
-        claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, ownerID, builders, containers, accessors, managers, inheritNothing, claimID);
+        claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, ownerID, builders, containers, accessors, managers, inheritNothing, claimID);
         claim.modifiedDate = new Date(lastModifiedDate);
         claim.id = claimID;
 
@@ -536,6 +547,9 @@ public class FlatFileDataStore extends DataStore
         //boundaries
         yaml.set("Lesser Boundary Corner", this.locationToString(claim.lesserBoundaryCorner));
         yaml.set("Greater Boundary Corner", this.locationToString(claim.greaterBoundaryCorner));
+        yaml.set("Core Block Location", this.locationToString(claim.coreBlockLocation));
+
+        yaml.set("Expires", claim.expirationDate.toString());
 
         //owner
         String ownerID = "";

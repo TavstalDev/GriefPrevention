@@ -35,6 +35,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -55,6 +56,10 @@ public class Claim
     //note that the upper Y value is always ignored, because claims ALWAYS extend up to the sky
     Location lesserBoundaryCorner;
     Location greaterBoundaryCorner;
+
+    public Location coreBlockLocation;
+    public LocalDateTime expirationDate;
+
 
     //modification date.  this comes from the file timestamp during load, and is updated with runtime changes
     public Date modifiedDate;
@@ -115,13 +120,18 @@ public class Claim
     }
 
     //main constructor.  note that only creating a claim instance does nothing - a claim must be added to the data store to be effective
-    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, boolean inheritNothing, Long id)
+    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, Location coreBlockLocation, LocalDateTime expirationDate, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, boolean inheritNothing, Long id)
     {
         //modification date
         this.modifiedDate = Calendar.getInstance().getTime();
 
         //id
         this.id = id;
+
+        // core block location
+        this.coreBlockLocation = coreBlockLocation;
+        // expiration date
+        this.expirationDate = expirationDate;
 
         //store corners
         this.lesserBoundaryCorner = lesserBoundaryCorner.clone();
@@ -174,14 +184,16 @@ public class Claim
         this.inheritNothing = inheritNothing;
     }
 
-    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, Long id)
+    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, Location coreBlockLocation, LocalDateTime expirationDate, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, Long id)
     {
-        this(lesserBoundaryCorner, greaterBoundaryCorner, ownerID, builderIDs, containerIDs, accessorIDs, managerIDs, false, id);
+        this(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expirationDate, ownerID, builderIDs, containerIDs, accessorIDs, managerIDs, false, id);
     }
 
     //produces a copy of a claim.
     public Claim(Claim claim) {
         this.modifiedDate = claim.modifiedDate;
+        this.coreBlockLocation = claim.coreBlockLocation;
+        this.expirationDate = claim.expirationDate;
         this.lesserBoundaryCorner = claim.greaterBoundaryCorner.clone();
         this.greaterBoundaryCorner = claim.greaterBoundaryCorner.clone();
         this.id = claim.id;
@@ -238,7 +250,7 @@ public class Claim
         Claim claim = new Claim
                 (new Location(this.lesserBoundaryCorner.getWorld(), this.lesserBoundaryCorner.getBlockX() - howNear, this.lesserBoundaryCorner.getBlockY(), this.lesserBoundaryCorner.getBlockZ() - howNear),
                         new Location(this.greaterBoundaryCorner.getWorld(), this.greaterBoundaryCorner.getBlockX() + howNear, this.greaterBoundaryCorner.getBlockY(), this.greaterBoundaryCorner.getBlockZ() + howNear),
-                        null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
+                        null, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
 
         return claim.contains(location, false, true);
     }

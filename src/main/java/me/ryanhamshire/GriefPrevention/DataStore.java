@@ -45,9 +45,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -840,9 +842,9 @@ public abstract class DataStore
     /*
      * Creates a claim and flags it as being new....throwing a create claim event;
      */
-    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2, UUID ownerID, Claim parent, Long id, Player creatingPlayer)
+    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2 ,Location coreBlock, LocalDateTime expireDate, UUID ownerID, Claim parent, Long id, Player creatingPlayer)
     {
-        return createClaim(world, x1, x2, y1, y2, z1, z2, ownerID, parent, id, creatingPlayer, false);
+        return createClaim(world, x1, x2, y1, y2, z1, z2, coreBlock, expireDate, ownerID, parent, id, creatingPlayer, false);
     }
 
     //creates a claim.
@@ -856,7 +858,7 @@ public abstract class DataStore
     //does NOT check a player has permission to create a claim, or enough claim blocks.
     //does NOT check minimum claim size constraints
     //does NOT visualize the new claim for any players
-    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2, UUID ownerID, Claim parent, Long id, Player creatingPlayer, boolean dryRun)
+    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2, Location coreBlock, LocalDateTime expireDate, UUID ownerID, Claim parent, Long id, Player creatingPlayer, boolean dryRun)
     {
         CreateClaimResult result = new CreateClaimResult();
 
@@ -916,7 +918,7 @@ public abstract class DataStore
         //claims can't be made outside the world border
         final Location smallerBoundaryCorner = new Location(world, smallx, smally, smallz);
         final Location greaterBoundaryCorner = new Location(world, bigx, bigy, bigz);
-        if(!world.getWorldBorder().isInside(smallerBoundaryCorner) || !world.getWorldBorder().isInside(greaterBoundaryCorner)){
+        if(!world.getWorldBorder().isInside(smallerBoundaryCorner) || !world.getWorldBorder().isInside(greaterBoundaryCorner) || !world.getWorldBorder().isInside(coreBlock)){
             result.succeeded = false;
             return result;
         }
@@ -931,6 +933,8 @@ public abstract class DataStore
         Claim newClaim = new Claim(
                 smallerBoundaryCorner,
                 greaterBoundaryCorner,
+                coreBlock,
+                expireDate,
                 ownerID,
                 new ArrayList<>(),
                 new ArrayList<>(),
@@ -1132,7 +1136,7 @@ public abstract class DataStore
     synchronized public CreateClaimResult resizeClaim(Claim claim, int newx1, int newx2, int newy1, int newy2, int newz1, int newz2, Player resizingPlayer)
     {
         //try to create this new claim, ignoring the original when checking for overlap
-        CreateClaimResult result = this.createClaim(claim.getLesserBoundaryCorner().getWorld(), newx1, newx2, newy1, newy2, newz1, newz2, claim.ownerID, claim.parent, claim.id, resizingPlayer, true);
+        CreateClaimResult result = this.createClaim(claim.getLesserBoundaryCorner().getWorld(), newx1, newx2, newy1, newy2, newz1, newz2, claim.coreBlockLocation, claim.expirationDate, claim.ownerID, claim.parent, claim.id, resizingPlayer, true);
 
         //if succeeded
         if (result.succeeded)

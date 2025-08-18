@@ -2004,6 +2004,7 @@ class PlayerEventHandler implements Listener
                             }
 
                             //try to create a new claim (will return null if this subdivision overlaps another)
+                            /* TODO: Add a way to determine where should the core block be set with the tool
                             CreateClaimResult result = this.dataStore.createClaim(
                                     player.getWorld(),
                                     playerData.lastShovelLocation.getBlockX(), clickedBlock.getX(),
@@ -2036,7 +2037,7 @@ class PlayerEventHandler implements Listener
                                 BoundaryVisualization.visualizeClaim(player, result.claim, VisualizationType.CLAIM, clickedBlock);
                                 playerData.lastShovelLocation = null;
                                 playerData.claimSubdividing = null;
-                            }
+                            }*/
                         }
                     }
 
@@ -2155,6 +2156,7 @@ class PlayerEventHandler implements Listener
                 }
 
                 //try to create a new claim
+                /* TODO: Add a way to determine where should the core block be set with the tool
                 CreateClaimResult result = this.dataStore.createClaim(
                         player.getWorld(),
                         lastShovelLocation.getBlockX(), clickedBlock.getX(),
@@ -2195,7 +2197,7 @@ class PlayerEventHandler implements Listener
                     }
 
                     AutoExtendClaimTask.scheduleAsync(result.claim);
-                }
+                }*/
             }
         }
     }

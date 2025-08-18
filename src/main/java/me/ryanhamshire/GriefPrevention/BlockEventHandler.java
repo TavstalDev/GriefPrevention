@@ -76,6 +76,7 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -351,7 +352,9 @@ public class BlockEventHandler implements Listener
                 //radius == 0 means protect ONLY the chest
                 if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius == 0)
                 {
-                    this.dataStore.createClaim(block.getWorld(), block.getX(), block.getX(), block.getY(), block.getY(), block.getZ(), block.getZ(), player.getUniqueId(), null, null, player);
+                    // TODO: Use config value
+                    var expires = LocalDateTime.now().plusDays(2);
+                    this.dataStore.createClaim(block.getWorld(), block.getX(), block.getX(), block.getY(), block.getY(), block.getZ(), block.getZ(), block.getLocation(), expires, player.getUniqueId(), null, null, player);
                     GriefPrevention.sendMessage(player, TextMode.Success, Messages.ChestClaimConfirmation);
                 }
 
@@ -373,11 +376,15 @@ public class BlockEventHandler implements Listener
                         int area = (radius * 2 + 1) * (radius * 2 + 1);
                         if (playerData.getRemainingClaimBlocks() >= area)
                         {
+                            // TODO: Use config value
+                            var expires = LocalDateTime.now().plusDays(2);
                             result = this.dataStore.createClaim(
                                     block.getWorld(),
                                     block.getX() - radius, block.getX() + radius,
                                     block.getY() - GriefPrevention.instance.config_claims_claimsExtendIntoGroundDistance, block.getY(),
                                     block.getZ() - radius, block.getZ() + radius,
+                                    block.getLocation(),
+                                    expires,
                                     player.getUniqueId(),
                                     null, null,
                                     player);

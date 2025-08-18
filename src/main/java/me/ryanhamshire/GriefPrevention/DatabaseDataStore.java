@@ -32,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -47,7 +48,7 @@ public class DatabaseDataStore extends DataStore
     private static final String SQL_UPDATE_NAME =
             "UPDATE griefprevention_playerdata SET name = ? WHERE name = ?";
     private static final String SQL_INSERT_CLAIM =
-            "INSERT INTO griefprevention_claimdata (id, owner, lessercorner, greatercorner, builders, containers, accessors, managers, inheritnothing, parentid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO griefprevention_claimdata (id, owner, lessercorner, greatercorner, coreblock, expires, builders, containers, accessors, managers, inheritnothing, parentid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_DELETE_CLAIM =
             "DELETE FROM griefprevention_claimdata WHERE id = ?";
     private static final String SQL_SELECT_PLAYER_DATA =
@@ -101,7 +102,7 @@ public class DatabaseDataStore extends DataStore
         {
             //ensure the data tables exist
             statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_nextclaimid (nextid INTEGER)");
-            statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_claimdata (id INTEGER, owner VARCHAR(50), lessercorner VARCHAR(100), greatercorner VARCHAR(100), builders TEXT, containers TEXT, accessors TEXT, managers TEXT, inheritnothing BOOLEAN, parentid INTEGER)");
+            statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_claimdata (id INTEGER, owner VARCHAR(50), lessercorner VARCHAR(100), greatercorner VARCHAR(100), coreblock VARCHAR(100), expires TEXT, builders TEXT, containers TEXT, accessors TEXT, managers TEXT, inheritnothing BOOLEAN, parentid INTEGER)");
             statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_playerdata (name VARCHAR(50), lastlogin DATETIME, accruedblocks INTEGER, bonusblocks INTEGER)");
             statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_schemaversion (version INTEGER)");
 
@@ -276,9 +277,11 @@ public class DatabaseDataStore extends DataStore
 
                 long parentId = results.getLong("parentid");
                 claimID = results.getLong("id");
+                LocalDateTime expireDate = LocalDateTime.parse(results.getString("expires"));
                 boolean inheritNothing = results.getBoolean("inheritNothing");
                 Location lesserBoundaryCorner = null;
                 Location greaterBoundaryCorner = null;
+                Location coreBlockLocation = null;
                 String lesserCornerString = "(location not available)";
                 try
                 {
@@ -286,6 +289,8 @@ public class DatabaseDataStore extends DataStore
                     lesserBoundaryCorner = this.locationFromString(lesserCornerString, validWorlds);
                     String greaterCornerString = results.getString("greatercorner");
                     greaterBoundaryCorner = this.locationFromString(greaterCornerString, validWorlds);
+                    String coreBlockString = results.getString("coreblock");
+                    coreBlockLocation = this.locationFromString(coreBlockString, validWorlds);
                 }
                 catch (Exception e)
                 {
@@ -346,7 +351,7 @@ public class DatabaseDataStore extends DataStore
                 String managersString = results.getString("managers");
                 List<String> managerNames = Arrays.asList(managersString.split(";"));
                 managerNames = this.convertNameListToUUIDList(managerNames);
-                Claim claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, ownerID, builderNames, containerNames, accessorNames, managerNames, inheritNothing, claimID);
+                Claim claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, ownerID, builderNames, containerNames, accessorNames, managerNames, inheritNothing, claimID);
 
                 if (removeClaim)
                 {
@@ -429,6 +434,7 @@ public class DatabaseDataStore extends DataStore
     {
         String lesserCornerString = this.locationToString(claim.getLesserBoundaryCorner());
         String greaterCornerString = this.locationToString(claim.getGreaterBoundaryCorner());
+        String coreBlockString = this.locationToString(claim.coreBlockLocation);
         String owner = "";
         if (claim.ownerID != null) owner = claim.ownerID.toString();
 
@@ -453,12 +459,14 @@ public class DatabaseDataStore extends DataStore
             insertStmt.setString(2, owner);
             insertStmt.setString(3, lesserCornerString);
             insertStmt.setString(4, greaterCornerString);
-            insertStmt.setString(5, buildersString);
-            insertStmt.setString(6, containersString);
-            insertStmt.setString(7, accessorsString);
-            insertStmt.setString(8, managersString);
-            insertStmt.setBoolean(9, inheritNothing);
-            insertStmt.setLong(10, parentId);
+            insertStmt.setString(5, coreBlockString);
+            insertStmt.setString(6, claim.expirationDate.toString());
+            insertStmt.setString(7, buildersString);
+            insertStmt.setString(8, containersString);
+            insertStmt.setString(9, accessorsString);
+            insertStmt.setString(10, managersString);
+            insertStmt.setBoolean(11, inheritNothing);
+            insertStmt.setLong(12, parentId);
             insertStmt.executeUpdate();
         }
         catch (SQLException e)
