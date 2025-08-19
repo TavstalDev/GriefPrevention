@@ -24,7 +24,8 @@ import com.griefprevention.commands.ClaimCommand;
 import com.griefprevention.metrics.MetricsHandler;
 import com.griefprevention.protection.ProtectionHelper;
 import com.samjakob.spigui.SpiGUI;
-import io.github.tavstaldev.RefreshClaimHologramTask;
+import io.github.tavstaldev.commands.ClaimsCommand;
+import io.github.tavstaldev.hologram.RefreshClaimHologramTask;
 import me.ryanhamshire.GriefPrevention.DataStore.NoTransferException;
 import me.ryanhamshire.GriefPrevention.events.SaveTrappedPlayerEvent;
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent;
@@ -360,7 +361,7 @@ public class GriefPrevention extends JavaPlugin
         this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task2, 20L * 60, 20L * config_advanced_claim_expiration_check_rate);
 
         RefreshClaimHologramTask task3 = new RefreshClaimHologramTask();
-        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task3, 20L * 60, 20L * 300); // TODO: add config for this
+        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task3, 20L * 60, 20L * 60 * 2); // TODO: add config for this
 
         //register for events
         PluginManager pluginManager = this.getServer().getPluginManager();
@@ -949,6 +950,7 @@ public class GriefPrevention extends JavaPlugin
     private void setUpCommands()
     {
         new ClaimCommand(this);
+        new ClaimsCommand(this);
     }
 
     //handles slash commands
@@ -2851,6 +2853,37 @@ public class GriefPrevention extends JavaPlugin
         {
             String prefix = GriefPrevention.instance.dataStore.getMessage(Messages.Prefix);
             player.sendMessage(prefix + color + message);
+        }
+    }
+
+    public static void sendMessageNoPrefix(@Nullable Player player, @NotNull ChatColor color, @NotNull Messages messageID, @NotNull String @NotNull ... args)
+    {
+        String message = GriefPrevention.instance.dataStore.getMessage(messageID, args);
+        if (message == null || message.isBlank()) return;
+
+        if (player == null)
+        {
+            Bukkit.getConsoleSender().sendMessage(color + message);
+            GriefPrevention.AddLogEntry(message, CustomLogEntryTypes.Debug, true);
+        }
+        else
+        {
+            player.sendMessage(color + message);
+        }
+    }
+
+    public static void sendMessageNoPrefix(@Nullable Player player, @NotNull ChatColor color, @NotNull String message)
+    {
+        if (message == null || message.isBlank()) return;
+
+        if (player == null)
+        {
+            Bukkit.getConsoleSender().sendMessage(color + message);
+            GriefPrevention.AddLogEntry(message, CustomLogEntryTypes.Debug, true);
+        }
+        else
+        {
+            player.sendMessage(color + message);
         }
     }
 
