@@ -23,6 +23,8 @@ import com.google.common.cache.CacheBuilder;
 import com.griefprevention.commands.ClaimCommand;
 import com.griefprevention.metrics.MetricsHandler;
 import com.griefprevention.protection.ProtectionHelper;
+import com.samjakob.spigui.SpiGUI;
+import io.github.tavstaldev.RefreshClaimHologramTask;
 import me.ryanhamshire.GriefPrevention.DataStore.NoTransferException;
 import me.ryanhamshire.GriefPrevention.events.SaveTrappedPlayerEvent;
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent;
@@ -106,6 +108,12 @@ public class GriefPrevention extends JavaPlugin
     PlayerEventHandler playerEventHandler;
     //configuration variables, loaded/saved from a config.yml
 
+    private SpiGUI spiGUI;
+    public SpiGUI GetGUI() {
+        return spiGUI;
+    }
+
+    //#region Configuration Variables
     //claim mode for each world
     public ConcurrentHashMap<World, ClaimsMode> config_claims_worldModes;
     private boolean config_creativeWorldsExist;                     //note on whether there are any creative mode worlds, to save cpu cycles on a common hash lookup
@@ -239,7 +247,7 @@ public class GriefPrevention extends JavaPlugin
     private String databaseUrl;
     private String databaseUserName;
     private String databasePassword;
-
+    //#endregion
 
     //how far away to search from a tree trunk for its branch blocks
     public static final int TREE_RADIUS = 5;
@@ -276,6 +284,8 @@ public class GriefPrevention extends JavaPlugin
         this.loadConfig();
 
         this.customLogger = new CustomLogger();
+
+        this.spiGUI = new SpiGUI(this);
 
         AddLogEntry("Finished loading configuration.");
 
@@ -348,6 +358,9 @@ public class GriefPrevention extends JavaPlugin
         //start recurring cleanup scan for unused claims belonging to inactive players
         FindUnusedClaimsTask task2 = new FindUnusedClaimsTask();
         this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task2, 20L * 60, 20L * config_advanced_claim_expiration_check_rate);
+
+        RefreshClaimHologramTask task3 = new RefreshClaimHologramTask();
+        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task3, 20L * 60, 20L * 300); // TODO: add config for this
 
         //register for events
         PluginManager pluginManager = this.getServer().getPluginManager();
@@ -2836,7 +2849,8 @@ public class GriefPrevention extends JavaPlugin
         }
         else
         {
-            player.sendMessage(color + message);
+            String prefix = GriefPrevention.instance.dataStore.getMessage(Messages.Prefix);
+            player.sendMessage(prefix + color + message);
         }
     }
 
