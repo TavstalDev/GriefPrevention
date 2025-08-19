@@ -46,7 +46,7 @@ class CleanupUnusedClaimPreTask implements Runnable
 
         //expiration code uses last logout timestamp to decide whether to expire claims
         //don't expire claims for online players
-        if (ownerInfo.isOnline())
+        /*if (ownerInfo.isOnline())
         {
             GriefPrevention.AddLogEntry("Player is online. Ignoring.", CustomLogEntryTypes.Debug, true);
             return;
@@ -55,7 +55,7 @@ class CleanupUnusedClaimPreTask implements Runnable
         {
             GriefPrevention.AddLogEntry("Player is new or not in the server's cached userdata. Ignoring. getLastPlayed = " + ownerInfo.getLastPlayed(), CustomLogEntryTypes.Debug, true);
             return;
-        }
+        }*/
 
         //skip claims belonging to exempted players based on block totals in config
         int bonusBlocks = ownerData.getBonusClaimBlocks();
