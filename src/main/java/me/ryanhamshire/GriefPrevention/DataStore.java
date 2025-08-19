@@ -1021,7 +1021,7 @@ public abstract class DataStore
             hologramData.addLine(getMessage(Messages.HologramOwner, newClaim.getOwnerName()));
             hologramData.addLine(getMessage(Messages.HologramMembers, "0"));
             hologramData.addLine(getMessage(Messages.HologramBlocks, String.valueOf(newClaim.getArea())));
-            hologramData.addLine(getMessage(Messages.HologramExpiry, newClaim.getShortRemainingTime()));
+            hologramData.addLine(getMessage(Messages.HologramExpiry, newClaim.getRemainingTime()));
 
             Hologram hologram = manager.create(hologramData);
             manager.addHologram(hologram);
