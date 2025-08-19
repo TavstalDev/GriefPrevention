@@ -1,4 +1,4 @@
-package io.github.tavstaldev;
+package io.github.tavstaldev.util;
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Material;
@@ -8,11 +8,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 

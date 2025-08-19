@@ -1,7 +1,11 @@
-package io.github.tavstaldev;
+package io.github.tavstaldev.gui;
 
 import com.samjakob.spigui.buttons.SGButton;
 import com.samjakob.spigui.menu.SGMenu;
+import io.github.tavstaldev.Constants;
+import io.github.tavstaldev.util.GuiUtils;
+import io.github.tavstaldev.cache.PlayerCache;
+import io.github.tavstaldev.cache.PlayerCacheManager;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
 import me.ryanhamshire.GriefPrevention.TextMode;
@@ -58,7 +62,7 @@ public class RefuelGUI
                     GuiUtils.createItem(Material.SPRUCE_DOOR, translation)
             ).withListener(event -> {
                 close(player);
-                PlayerCache playerData = PlayerManager.getPlayerData(playerId);
+                PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
                 MainGUI.open(player, playerData.getClaim());
             });
             menu.setButton(0, 45, closeButton);
@@ -68,7 +72,7 @@ public class RefuelGUI
             SGButton prevPageButton = new SGButton(
                     GuiUtils.createItem(Material.ARROW, translation)
             ).withListener(event -> {
-                PlayerCache playerData = PlayerManager.getPlayerData(playerId);
+                PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
                 if (playerData.getRefuelPage() > 1) {
                     playerData.setRefuelPage(playerData.getRefuelPage() - 1);
                     refresh(player);
@@ -91,7 +95,7 @@ public class RefuelGUI
             SGButton nextPageButton = new SGButton(
                     GuiUtils.createItem(Material.ARROW, translation)
             ).withListener(event -> {
-                PlayerCache playerData = PlayerManager.getPlayerData(playerId);
+                PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
                 if (playerData.getClaim() == null)
                     return;
 
@@ -112,7 +116,7 @@ public class RefuelGUI
     }
 
     public static void open(@NotNull Player player) {
-        PlayerCache playerData = PlayerManager.getPlayerData(player.getUniqueId());
+        PlayerCache playerData = PlayerCacheManager.getPlayerData(player.getUniqueId());
         // Show the GUI
         playerData.setGUIOpened(true);
         playerData.setRefuelPage(1);
@@ -121,7 +125,7 @@ public class RefuelGUI
     }
 
     public static void close(@NotNull Player player) {
-        PlayerCache playerData = PlayerManager.getPlayerData(player.getUniqueId());
+        PlayerCache playerData = PlayerCacheManager.getPlayerData(player.getUniqueId());
         player.closeInventory();
         playerData.setGUIOpened(false);
     }
@@ -129,7 +133,7 @@ public class RefuelGUI
     public static void refresh(@NotNull Player player) {
         try {
             var playerId = player.getUniqueId();
-            PlayerCache playerData = PlayerManager.getPlayerData(playerId);
+            PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
             var menu = playerData.getRefuelMenu();
             final var claim = playerData.getClaim();
             if (claim == null)

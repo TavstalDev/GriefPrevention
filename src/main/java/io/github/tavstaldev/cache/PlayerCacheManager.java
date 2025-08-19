@@ -1,10 +1,10 @@
-package io.github.tavstaldev;
+package io.github.tavstaldev.cache;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PlayerManager {
+public class PlayerCacheManager {
     private static final Map<UUID, PlayerCache> _playerData = new HashMap<>();
 
     /**

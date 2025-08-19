@@ -1,6 +1,8 @@
-package io.github.tavstaldev;
+package io.github.tavstaldev.cache;
 
 import com.samjakob.spigui.menu.SGMenu;
+import io.github.tavstaldev.gui.MainGUI;
+import io.github.tavstaldev.gui.RefuelGUI;
 import me.ryanhamshire.GriefPrevention.Claim;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;

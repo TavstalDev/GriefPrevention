@@ -1,7 +1,11 @@
-package io.github.tavstaldev;
+package io.github.tavstaldev.gui;
 
 import com.samjakob.spigui.buttons.SGButton;
 import com.samjakob.spigui.menu.SGMenu;
+import io.github.tavstaldev.Constants;
+import io.github.tavstaldev.util.GuiUtils;
+import io.github.tavstaldev.cache.PlayerCache;
+import io.github.tavstaldev.cache.PlayerCacheManager;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
@@ -68,7 +72,7 @@ public class MainGUI {
             SGButton prevPageButton = new SGButton(
                     GuiUtils.createItem(Material.ARROW, translation)
             ).withListener(event -> {
-                PlayerCache playerData = PlayerManager.getPlayerData(playerId);
+                PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
                 if (playerData.getMainPage() > 1) {
                     playerData.setMainPage(playerData.getMainPage() - 1);
                     refresh(player);
@@ -91,7 +95,7 @@ public class MainGUI {
             SGButton nextPageButton = new SGButton(
                     GuiUtils.createItem(Material.ARROW, translation)
             ).withListener(event -> {
-                PlayerCache playerData = PlayerManager.getPlayerData(playerId);
+                PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
                 if (playerData.getClaim() == null)
                     return;
 
@@ -120,7 +124,7 @@ public class MainGUI {
     }
 
     public static void open(@NotNull Player player, Claim claim) {
-        PlayerCache playerData = PlayerManager.getPlayerData(player.getUniqueId());
+        PlayerCache playerData = PlayerCacheManager.getPlayerData(player.getUniqueId());
         // Show the GUI
         playerData.setGUIOpened(true);
         playerData.setMainPage(1);
@@ -128,14 +132,14 @@ public class MainGUI {
         player.openInventory(playerData.getMainMenu().getInventory());
 
         // Update GUI title
-        String translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiTitle, claim.getShortRemainingTime());
+        String translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiTitle, claim.getRemainingTime());
         playerData.getMainMenu().setName(translation);
 
         refresh(player);
     }
 
     public static void close(@NotNull Player player) {
-        PlayerCache playerData = PlayerManager.getPlayerData(player.getUniqueId());
+        PlayerCache playerData = PlayerCacheManager.getPlayerData(player.getUniqueId());
         player.closeInventory();
         playerData.setGUIOpened(false);
     }
@@ -143,7 +147,7 @@ public class MainGUI {
     public static void refresh(@NotNull Player player) {
         try {
             var playerId = player.getUniqueId();
-            PlayerCache playerData = PlayerManager.getPlayerData(playerId);
+            PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
             var menu = playerData.getMainMenu();
             var claim = playerData.getClaim();
             if (claim == null)
@@ -197,7 +201,7 @@ public class MainGUI {
             loreList.clear(); // Reset lore list for next section
             //#region Make Lore
             // Remaining Time
-            translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiTimeInformationRemaining, claim.getShortRemainingTime());
+            translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiTimeInformationRemaining, claim.getRemainingTime());
             loreList.add(translation);
 
             // Action
@@ -223,7 +227,7 @@ public class MainGUI {
             loreList.clear(); // Reset lore list for next section
             //#region Make Lore
             // Remaining Time
-            translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiFuelInformationRemaining, claim.getShortRemainingTime());
+            translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiFuelInformationRemaining, claim.getRemainingTime());
             loreList.add(translation);
 
             // Supported Materials
