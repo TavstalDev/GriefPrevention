@@ -23,6 +23,9 @@ import com.griefprevention.util.command.MonitorableCommand;
 import com.griefprevention.util.command.MonitoredCommands;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
+import io.github.tavstaldev.MainGUI;
+import io.github.tavstaldev.PlayerCache;
+import io.github.tavstaldev.PlayerManager;
 import me.ryanhamshire.GriefPrevention.events.ClaimInspectionEvent;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
 import org.bukkit.BanList;
@@ -631,6 +634,9 @@ class PlayerEventHandler implements Listener
         PlayerData playerData = this.dataStore.getPlayerData(playerID);
         playerData.lastSpawn = now;
         this.lastLoginThisServerSessionMap.put(playerID, nowDate);
+
+        var playerCacheData = new PlayerCache(player);
+        PlayerManager.addPlayerData(player.getUniqueId(), playerCacheData);
 
         //if newish, prevent chat until he's moved a bit to prove he's not a bot
         if (GriefPrevention.isNewToServer(player) && !player.hasPermission("griefprevention.premovementchat"))
@@ -1539,6 +1545,24 @@ class PlayerEventHandler implements Listener
         if (action == Action.LEFT_CLICK_BLOCK && clickedBlock != null && !this.onLeftClickWatchList(clickedBlockType))
         {
             return;
+        }
+
+        //apply rule for right-clicking on core block
+        if (clickedBlock != null)
+        {
+            if (playerData == null)
+                playerData = this.dataStore.getPlayerData(player.getUniqueId());
+            Claim claimFromPlayerLocation = this.dataStore.getClaimAt(clickedBlock.getLocation(), true, playerData.lastClaim);
+            if (claimFromPlayerLocation != null &&
+                    (clickedBlock.getX() == claimFromPlayerLocation.coreBlockLocation.getBlockX() &&
+                            clickedBlock.getY() == claimFromPlayerLocation.coreBlockLocation.getBlockY() &&
+                            clickedBlock.getZ() == claimFromPlayerLocation.coreBlockLocation.getBlockZ() &&
+                            clickedBlock.getWorld() == claimFromPlayerLocation.coreBlockLocation.getWorld()))
+            {
+                event.setCancelled(true); //cancel the event so that the player can't open the claim's GUI
+                MainGUI.open(player, claimFromPlayerLocation);
+                return;
+            }
         }
 
         //apply rules for containers and crafting blocks
