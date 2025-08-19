@@ -213,7 +213,62 @@ public enum Messages
     StandInSubclaim("You need to be standing in a subclaim to restrict it"),
     SubclaimRestricted("This subclaim's permissions will no longer inherit from the parent claim"),
     SubclaimUnrestricted("This subclaim's permissions will now inherit from the parent claim"),
-    NetherPortalTrapDetectionMessage("It seems you might be stuck inside a nether portal. We will rescue you in a few seconds if that is the case!", "Sent to player on join, if they left while inside a nether portal.");
+    NetherPortalTrapDetectionMessage("It seems you might be stuck inside a nether portal. We will rescue you in a few seconds if that is the case!", "Sent to player on join, if they left while inside a nether portal."),
+
+    // CUSTOM MESSAGES
+
+    Prefix("$8[$6GriefPrevention$8] "),
+    ClaimAutoRemoved("$cYour claim has been automatically removed due to inactivity."),
+
+    HologramTitle("$8[$6CLAIM$8]"),
+    HologramOwner("$fOwner: $e{0}"),
+    HologramMembers("$fMembers: $a{0}"),
+    HologramBlocks("$fBlocks: $e{0}"),
+    HologramExpiry("$fExpiry: $c{0}"),
+
+
+    GuiTitle("$8[$6CLAIM$8] $4{0}"),
+    GuiClose("$cClose"),
+    GuiPreviousPage("$fPrevious Page"),
+    GuiNextPage("$fNext Page"),
+    GuiPage("$fPage $e{0}$f/$6{1}"),
+    GuiClickToUntrust("$c> $eClick to untrust"),
+
+    GuiClaimInformation("$fClaim Information"),
+    GuiClaimInformationOwner("$7Owner: $e{0}"),
+    GuiClaimInformationNoOwner("$7Owner: $cUnknown"),
+    GuiClaimInformationSize("$7Size: $e{0}$7x$e{1}"),
+    GuiClaimInformationMembers("$7Members: $a{0}"),
+
+    GuiTimeInformation("$fTime Information"),
+    GuiTimeInformationRemaining("$7Remaining: $c{0}"),
+    GuiTimeInformationAction("$c> $eClick to refuel"),
+
+    GuiFuelInformation("$6Fuel Information"),
+    GuiFuelInformationRemaining("$7Remaining: $c{0}"),
+    GuiFuelInformationMaterials("$7Supported materials:"),
+    GuiFuelInformationMaterialsList("$7- $f{0} $7= $a{1}"),
+    GuiFuelInformationAction("$c> $eClick to refuel"),
+
+    GuiRefuelTitle("$8[$6CLAIM$8] $4Refuel"),
+    GuiRefuelWarning("$6 Warning"),
+    GuiRefuelWarningMessage("$7> The maximum fuel level is $c{0}$7. "),
+    GuiRefuelDuration("$7Duration: $e{0}"),
+
+    GuiRefuelNoFuel("$cYou don't have any fuel in your inventory!"),
+    GuiRefuelFull("$cYour claim is already fully fueled!"),
+    GuiRefuelNearLimit("$cYour claim is near the maximum fuel limit!"),
+    GuiRefuelSuccess("$aRefueled your claim!"),
+
+    Unknown("unknown"),
+    Expired("expired"),
+    Day("{0} day(s)"),
+    Hour("{0} hour(s)"),
+    Minute("{0} minute(s)"),
+    Second("{0} second(s)"),
+
+
+    TemporalTranslation("This will be removed after I stop adding new messages, it is for prevent errors in the meantime.");
 
     final @NotNull String defaultValue;
     final @Nullable String notes;
