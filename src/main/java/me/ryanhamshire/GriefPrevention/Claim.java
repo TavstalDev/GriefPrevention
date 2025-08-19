@@ -828,29 +828,7 @@ public class Claim
         return this.expirationDate != null && this.expirationDate.isBefore(LocalDateTime.now());
     }
 
-    public String getShortRemainingTime() {
-        if (this.expirationDate == null)
-            return GriefPrevention.instance.dataStore.getMessage(Messages.Unknown);
-
-        LocalDateTime now = LocalDateTime.now();
-        if (this.expirationDate.isBefore(now))
-            return GriefPrevention.instance.dataStore.getMessage(Messages.Expired);
-
-        long seconds = java.time.Duration.between(now, this.expirationDate).getSeconds();
-        long days = seconds / 86400;
-        seconds %= 86400;
-        long hours = seconds / 3600;
-        seconds %= 3600;
-        long minutes = seconds / 60;
-        seconds %= 60;
-
-        return String.join(" ",
-                GriefPrevention.instance.dataStore.getMessage(Messages.Day, String.valueOf(days)),
-                GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(hours))
-        );
-    }
-
-    public String getRemainingTime()
+    public String getRemainingTime(boolean returnSeconds)
     {
         if (this.expirationDate == null)
             return GriefPrevention.instance.dataStore.getMessage(Messages.Unknown);
@@ -865,15 +843,35 @@ public class Claim
         long hours = seconds / 3600;
         seconds %= 3600;
         long minutes = seconds / 60;
-        seconds %= 60;
+
+        if (days >= 1) {
+            return String.join(" ",
+                    GriefPrevention.instance.dataStore.getMessage(Messages.Day, String.valueOf(days)),
+                    GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(hours))
+            );
+        }
+
+        if (hours >= 1) {
+            return String.join(" ",
+                    GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(hours)),
+                    GriefPrevention.instance.dataStore.getMessage(Messages.Minute, String.valueOf(minutes))
+            );
+        }
+
+        if (returnSeconds) {
+            seconds %= 60;
+            return String.join(" ",
+                    GriefPrevention.instance.dataStore.getMessage(Messages.Minute, String.valueOf(minutes)),
+                    GriefPrevention.instance.dataStore.getMessage(Messages.Second, String.valueOf(seconds))
+            );
+        }
 
         return String.join(" ",
-                GriefPrevention.instance.dataStore.getMessage(Messages.Day, String.valueOf(days)),
-                GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(hours)),
-                GriefPrevention.instance.dataStore.getMessage(Messages.Minute, String.valueOf(minutes)),
-                GriefPrevention.instance.dataStore.getMessage(Messages.Second, String.valueOf(seconds))
+                GriefPrevention.instance.dataStore.getMessage(Messages.Minute, String.valueOf(minutes))
         );
     }
+
+    public String getRemainingTime() {return getRemainingTime(true); }
 
     public void refreshHologram() {
         HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
@@ -896,7 +894,7 @@ public class Claim
             textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramOwner, getOwnerName()));
             textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramMembers, String.valueOf(builders.size())));
             textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramBlocks, String.valueOf(getArea())));
-            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramExpiry, getShortRemainingTime()));
+            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramExpiry, getRemainingTime(false)));
         }
 
         hologram.forceUpdate();
