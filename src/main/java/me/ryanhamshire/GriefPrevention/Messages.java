@@ -220,6 +220,18 @@ public enum Messages
     Prefix("$8[$6GriefPrevention$8] "),
     ClaimAutoRemoved("$cYour claim has been automatically removed due to inactivity."),
 
+    Commands("$eCommands:"),
+    CommandList("$7/claims list $8- $7List your claims"),
+    CommandCreate("$7/claims create $8- $7Claim a new area of land"),
+    CommandAbandon("$7/claims abandon $8- $7Abandon your current claim"),
+    CommandTrust("$7/claims trust <player> $8- $7Trust a player with building in your claim"),
+    CommandTrustAccess("$7/claims access <player> $8- $7Allow a player to use buttons, levers, and beds in your claim"),
+    CommandTrustContainer("$7/claims container <player> $8- $7Allow a player to use containers in your claim"),
+    CommandTrustList("$7/claims trusts $8- $7List the players you have trusted in your claim"),
+    CommandToggleExplosions("$7/claims explosions $8- $7Toggle explosions in your claim"),
+    CommandUntrust("$7/claims untrust <player> $8- $7Untrust a player from your claim"),
+    CommandUntrustAll("$7/claims untrustall $8- $7Untrust all players from your claim"),
+
     HologramTitle("$8[$6CLAIM$8]"),
     HologramOwner("$fOwner: $e{0}"),
     HologramMembers("$fMembers: $a{0}"),
