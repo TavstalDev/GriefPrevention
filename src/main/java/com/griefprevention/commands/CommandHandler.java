@@ -12,10 +12,9 @@ import java.util.List;
 
 public abstract class CommandHandler implements TabExecutor
 {
-
     protected final GriefPrevention plugin;
 
-    CommandHandler(@NotNull GriefPrevention plugin, String command)
+    protected CommandHandler(@NotNull GriefPrevention plugin, String command)
     {
         this.plugin = plugin;
         setExecutor(command);
