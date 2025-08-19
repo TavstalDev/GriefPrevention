@@ -151,8 +151,6 @@ public class BlockEventHandler implements Listener
                 block.getZ() == coreBlock.getBlockZ() &&
                 block.getWorld() == coreBlock.getWorld()))
         {
-            GriefPrevention.sendMessage(player, TextMode.Info, "Block X: " + block.getX() + ", Y: " + block.getY() + ", Z: " + block.getZ() + ", World:" + block.getWorld().getName());
-            GriefPrevention.sendMessage(player, TextMode.Info, "CoreBlock X: " + coreBlock.getX() + ", Y: " + coreBlock.getY() + ", Z: " + coreBlock.getZ()+ ", World:" + coreBlock.getWorld().getName());
             return;
         }
 
