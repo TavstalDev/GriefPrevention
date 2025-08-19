@@ -18,6 +18,10 @@
 
 package me.ryanhamshire.GriefPrevention;
 
+import de.oliver.fancyholograms.api.FancyHologramsPlugin;
+import de.oliver.fancyholograms.api.HologramManager;
+import de.oliver.fancyholograms.api.data.HologramData;
+import de.oliver.fancyholograms.api.data.TextHologramData;
 import me.ryanhamshire.GriefPrevention.events.ClaimPermissionCheckEvent;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
 import org.bukkit.Bukkit;
@@ -817,5 +821,85 @@ public class Claim
     ArrayList<Long> getChunkHashes()
     {
         return DataStore.getChunkHashes(this);
+    }
+
+    public boolean isExpired()
+    {
+        return this.expirationDate != null && this.expirationDate.isBefore(LocalDateTime.now());
+    }
+
+    public String getShortRemainingTime() {
+        if (this.expirationDate == null)
+            return GriefPrevention.instance.dataStore.getMessage(Messages.Unknown);
+
+        LocalDateTime now = LocalDateTime.now();
+        if (this.expirationDate.isBefore(now))
+            return GriefPrevention.instance.dataStore.getMessage(Messages.Expired);
+
+        long seconds = java.time.Duration.between(now, this.expirationDate).getSeconds();
+        long days = seconds / 86400;
+        seconds %= 86400;
+        long hours = seconds / 3600;
+        seconds %= 3600;
+        long minutes = seconds / 60;
+        seconds %= 60;
+
+        return String.join(" ",
+                GriefPrevention.instance.dataStore.getMessage(Messages.Day, String.valueOf(days)),
+                GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(hours))
+        );
+    }
+
+    public String getRemainingTime()
+    {
+        if (this.expirationDate == null)
+            return GriefPrevention.instance.dataStore.getMessage(Messages.Unknown);
+
+        LocalDateTime now = LocalDateTime.now();
+        if (this.expirationDate.isBefore(now))
+            return GriefPrevention.instance.dataStore.getMessage(Messages.Expired);
+
+        long seconds = java.time.Duration.between(now, this.expirationDate).getSeconds();
+        long days = seconds / 86400;
+        seconds %= 86400;
+        long hours = seconds / 3600;
+        seconds %= 3600;
+        long minutes = seconds / 60;
+        seconds %= 60;
+
+        return String.join(" ",
+                GriefPrevention.instance.dataStore.getMessage(Messages.Day, String.valueOf(days)),
+                GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(hours)),
+                GriefPrevention.instance.dataStore.getMessage(Messages.Minute, String.valueOf(minutes)),
+                GriefPrevention.instance.dataStore.getMessage(Messages.Second, String.valueOf(seconds))
+        );
+    }
+
+    public void refreshHologram() {
+        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+        var hologramOpt = manager.getHologram("claim_" + id);
+        if (hologramOpt.isEmpty())
+            return;
+
+        var hologram = hologramOpt.get();
+        HologramData hologramData = hologram.getData();
+
+        ArrayList<String> builders = new ArrayList<>();
+        ArrayList<String> containers = new ArrayList<>();
+        ArrayList<String> accessors = new ArrayList<>();
+        ArrayList<String> managers = new ArrayList<>();
+        getPermissions(builders, containers, accessors, managers);
+
+        if (hologramData instanceof TextHologramData textData) {
+            textData.setText(new ArrayList<>());
+            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramTitle));
+            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramOwner, getOwnerName()));
+            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramMembers, String.valueOf(builders.size())));
+            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramBlocks, String.valueOf(getArea())));
+            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramExpiry, getShortRemainingTime()));
+        }
+
+        hologram.forceUpdate();
+        hologram.queueUpdate();
     }
 }
