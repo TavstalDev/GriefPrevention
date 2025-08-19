@@ -181,6 +181,11 @@ commands:
       description: Gives a player a manual about claiming land.
       usage: /<command> <player>
       permission: griefprevention.claimbook
+    claims:
+      description: Wrapper command for all claim-related commands.
+      usage: /<command>
+      aliases: [ tc, regions, zones, land ]
+      permission: griefprevention.claims
 permissions:
     griefprevention.createclaims:
         description: Grants permission to create claims.
