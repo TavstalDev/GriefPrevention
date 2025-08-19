@@ -21,6 +21,10 @@ package me.ryanhamshire.GriefPrevention;
 import com.google.common.io.Files;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
+import de.oliver.fancyholograms.api.FancyHologramsPlugin;
+import de.oliver.fancyholograms.api.HologramManager;
+import de.oliver.fancyholograms.api.data.TextHologramData;
+import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import me.ryanhamshire.GriefPrevention.events.ClaimDeletedEvent;
 import me.ryanhamshire.GriefPrevention.events.ClaimExtendEvent;
@@ -49,7 +53,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -652,6 +655,12 @@ public abstract class DataStore
         //mark as deleted so any references elsewhere can be ignored
         claim.inDataStore = false;
 
+        // remove any holograms associated with this claim
+            HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+            var hologram = manager.getHologram("claim_" + claim.id);
+            if (hologram.isPresent())
+                manager.removeHologram(hologram.get());
+
         //remove from memory
         for (int i = 0; i < this.claims.size(); i++)
         {
@@ -942,6 +951,13 @@ public abstract class DataStore
                 new ArrayList<>(),
                 id);
 
+        if (!newClaim.contains(coreBlock, true, false))
+        {
+            //if the core block is not inside the claim, return failure
+            result.succeeded = false;
+            return result;
+        }
+
         newClaim.parent = parent;
 
         //ensure this new claim won't overlap any existing claims
@@ -986,6 +1002,30 @@ public abstract class DataStore
         }
         //otherwise add this new claim to the data store to make it effective
         this.addClaim(newClaim, true);
+
+        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+        if (manager.getHologram("claim_" + newClaim.id).isPresent())
+        {
+           newClaim.refreshHologram();
+        }
+        else
+        {
+            var hologramLocation = newClaim.coreBlockLocation.clone();
+            hologramLocation.setX(hologramLocation.getBlockX() + 0.5); // center the hologram
+            hologramLocation.setY(hologramLocation.getBlockY() + 2);
+            hologramLocation.setZ(hologramLocation.getBlockZ() + 0.5); // center the hologram
+            TextHologramData hologramData = new TextHologramData("claim_" + newClaim.id, hologramLocation);
+            // Adjust the Hologram Data
+            hologramData.removeLine(0);
+            hologramData.addLine(getMessage(Messages.HologramTitle));
+            hologramData.addLine(getMessage(Messages.HologramOwner, newClaim.getOwnerName()));
+            hologramData.addLine(getMessage(Messages.HologramMembers, "0"));
+            hologramData.addLine(getMessage(Messages.HologramBlocks, String.valueOf(newClaim.getArea())));
+            hologramData.addLine(getMessage(Messages.HologramExpiry, newClaim.getShortRemainingTime()));
+
+            Hologram hologram = manager.create(hologramData);
+            manager.addHologram(hologram);
+        }
 
         //then return success along with reference to new claim
         result.succeeded = true;
