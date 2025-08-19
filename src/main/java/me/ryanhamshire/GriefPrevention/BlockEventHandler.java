@@ -18,10 +18,11 @@
 
 package me.ryanhamshire.GriefPrevention;
 
+import com.griefprevention.protection.ProtectionHelper;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
+import io.github.tavstaldev.Constants;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
-import com.griefprevention.protection.ProtectionHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -135,6 +136,45 @@ public class BlockEventHandler implements Listener
             breakEvent.setCancelled(true);
             return;
         }
+
+        // If the block is the core block of a claim and the player is the owner, remove the claim.
+        var playerData = this.dataStore.getPlayerData(player.getUniqueId());
+        // Do not use cached claim here
+        Claim claim = this.dataStore.getClaimAt(block.getLocation(), true, null);
+        if (claim == null)
+            return;
+
+        var coreBlock = claim.coreBlockLocation;
+
+        if (!(block.getX() == coreBlock.getBlockX() &&
+                block.getY() == coreBlock.getBlockY() &&
+                block.getZ() == coreBlock.getBlockZ() &&
+                block.getWorld() == coreBlock.getWorld()))
+        {
+            GriefPrevention.sendMessage(player, TextMode.Info, "Block X: " + block.getX() + ", Y: " + block.getY() + ", Z: " + block.getZ() + ", World:" + block.getWorld().getName());
+            GriefPrevention.sendMessage(player, TextMode.Info, "CoreBlock X: " + coreBlock.getX() + ", Y: " + coreBlock.getY() + ", Z: " + coreBlock.getZ()+ ", World:" + coreBlock.getWorld().getName());
+            return;
+        }
+
+        if (!player.getUniqueId().equals(claim.getOwnerID()))
+        {
+            breakEvent.setCancelled(true);
+            GriefPrevention.sendMessage(player, TextMode.Err, Messages.OnlyOwnersModifyClaims,
+                    GriefPrevention.lookupPlayerName(claim.getOwnerID()));
+            return;
+        }
+
+        this.dataStore.deleteClaim(claim, true, false);
+
+        //adjust claim blocks when abandoning a top level claim
+        if (GriefPrevention.instance.config_claims_abandonReturnRatio != 1.0D && claim.parent == null && claim.ownerID.equals(playerData.playerID))
+        {
+            playerData.setAccruedClaimBlocks(playerData.getAccruedClaimBlocks() - (int) Math.ceil((claim.getArea() * (1 - GriefPrevention.instance.config_claims_abandonReturnRatio))));
+        }
+
+        //tell the player how many claim blocks he has left
+        int remainingBlocks = playerData.getRemainingClaimBlocks();
+        GriefPrevention.sendMessage(player, TextMode.Success, Messages.AbandonSuccess, String.valueOf(remainingBlocks));
     }
 
     //when a player changes the text of a sign...
@@ -335,7 +375,7 @@ public class BlockEventHandler implements Listener
         //FEATURE: automatically create a claim when a player who has no claims places a chest
 
         //otherwise if there's no claim, the player is placing a chest, and new player automatic claims are enabled
-        else if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius > -1 && player.hasPermission("griefprevention.createclaims") && block.getType() == Material.CHEST)
+        else if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius > -1 && player.hasPermission("griefprevention.createclaims") && block.getType() == Constants.CORE_BLOCK_MATERIAL)
         {
             //if the chest is too deep underground, don't create the claim and explain why
             if (GriefPrevention.instance.config_claims_preventTheft && block.getY() < GriefPrevention.instance.config_claims_maxDepth)
@@ -352,8 +392,7 @@ public class BlockEventHandler implements Listener
                 //radius == 0 means protect ONLY the chest
                 if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius == 0)
                 {
-                    // TODO: Use config value
-                    var expires = LocalDateTime.now().plusDays(2);
+                    var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
                     this.dataStore.createClaim(block.getWorld(), block.getX(), block.getX(), block.getY(), block.getY(), block.getZ(), block.getZ(), block.getLocation(), expires, player.getUniqueId(), null, null, player);
                     GriefPrevention.sendMessage(player, TextMode.Success, Messages.ChestClaimConfirmation);
                 }
@@ -376,8 +415,7 @@ public class BlockEventHandler implements Listener
                         int area = (radius * 2 + 1) * (radius * 2 + 1);
                         if (playerData.getRemainingClaimBlocks() >= area)
                         {
-                            // TODO: Use config value
-                            var expires = LocalDateTime.now().plusDays(2);
+                            var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
                             result = this.dataStore.createClaim(
                                     block.getWorld(),
                                     block.getX() - radius, block.getX() + radius,
