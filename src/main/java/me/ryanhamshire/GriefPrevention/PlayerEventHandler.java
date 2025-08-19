@@ -23,9 +23,9 @@ import com.griefprevention.util.command.MonitorableCommand;
 import com.griefprevention.util.command.MonitoredCommands;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
-import io.github.tavstaldev.MainGUI;
-import io.github.tavstaldev.PlayerCache;
-import io.github.tavstaldev.PlayerManager;
+import io.github.tavstaldev.gui.MainGUI;
+import io.github.tavstaldev.cache.PlayerCache;
+import io.github.tavstaldev.cache.PlayerCacheManager;
 import me.ryanhamshire.GriefPrevention.events.ClaimInspectionEvent;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
 import org.bukkit.BanList;
@@ -636,7 +636,7 @@ class PlayerEventHandler implements Listener
         this.lastLoginThisServerSessionMap.put(playerID, nowDate);
 
         var playerCacheData = new PlayerCache(player);
-        PlayerManager.addPlayerData(player.getUniqueId(), playerCacheData);
+        PlayerCacheManager.addPlayerData(player.getUniqueId(), playerCacheData);
 
         //if newish, prevent chat until he's moved a bit to prove he's not a bot
         if (GriefPrevention.isNewToServer(player) && !player.hasPermission("griefprevention.premovementchat"))
@@ -1880,7 +1880,7 @@ class PlayerEventHandler implements Listener
 
                     if (player.hasPermission("griefprevention.seeclaimsize"))
                     {
-                        GriefPrevention.sendMessage(player, TextMode.Info, "  " + claim.getWidth() + "x" + claim.getHeight() + "=" + claim.getArea());
+                        GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, "  " + claim.getWidth() + "x" + claim.getHeight() + "=" + claim.getArea());
                     }
 
                     //if permission, tell about the player's offline time
@@ -1894,7 +1894,7 @@ class PlayerEventHandler implements Listener
                         Date now = new Date();
                         long daysElapsed = (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24);
 
-                        GriefPrevention.sendMessage(player, TextMode.Info, Messages.PlayerOfflineTime, String.valueOf(daysElapsed));
+                        GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.PlayerOfflineTime, String.valueOf(daysElapsed));
 
                         //drop the data we just loaded, if the player isn't online
                         if (instance.getServer().getPlayer(claim.ownerID) == null)
