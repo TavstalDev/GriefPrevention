@@ -2,6 +2,7 @@ package com.griefprevention.commands;
 
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
+import io.github.tavstaldev.Constants;
 import me.ryanhamshire.GriefPrevention.AutoExtendClaimTask;
 import me.ryanhamshire.GriefPrevention.CreateClaimResult;
 import me.ryanhamshire.GriefPrevention.DataStore;
@@ -169,8 +170,7 @@ public class ClaimCommand extends CommandHandler
             @Nullable UUID ownerId)
     {
         World world = player.getWorld();
-        // TODO: Use config value
-        var expires = LocalDateTime.now().plusDays(2);
+        var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
         CreateClaimResult result = plugin.dataStore.createClaim(world,
                 lesser.getBlockX(), greater.getBlockX(),
                 lesser.getBlockY() - plugin.config_claims_claimsExtendIntoGroundDistance - 1,
