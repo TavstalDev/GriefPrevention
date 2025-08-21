@@ -25,6 +25,7 @@ import de.oliver.fancyholograms.api.FancyHologramsPlugin;
 import de.oliver.fancyholograms.api.HologramManager;
 import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
+import io.github.tavstaldev.Constants;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import me.ryanhamshire.GriefPrevention.events.ClaimDeletedEvent;
 import me.ryanhamshire.GriefPrevention.events.ClaimExtendEvent;
@@ -35,6 +36,7 @@ import me.ryanhamshire.GriefPrevention.util.BoundingBox;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -655,11 +657,17 @@ public abstract class DataStore
         //mark as deleted so any references elsewhere can be ignored
         claim.inDataStore = false;
 
+        // remove core block to prevent duping
+        var block = claim.coreBlockLocation.getBlock();
+        if (!claim.isPlacedByPlayer && block.getType().equals(Constants.CORE_BLOCK_MATERIAL)) {
+            block.setType(Material.AIR);
+        }
+
         // remove any holograms associated with this claim
-            HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-            var hologram = manager.getHologram("claim_" + claim.id);
-            if (hologram.isPresent())
-                manager.removeHologram(hologram.get());
+        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+        var hologram = manager.getHologram("claim_" + claim.id);
+        if (hologram.isPresent())
+            manager.removeHologram(hologram.get());
 
         //remove from memory
         for (int i = 0; i < this.claims.size(); i++)
@@ -851,9 +859,9 @@ public abstract class DataStore
     /*
      * Creates a claim and flags it as being new....throwing a create claim event;
      */
-    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2 ,Location coreBlock, LocalDateTime expireDate, UUID ownerID, Claim parent, Long id, Player creatingPlayer)
+    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2 ,Location coreBlock, boolean isPlacedByPlayer, LocalDateTime expireDate, UUID ownerID, Claim parent, Long id, Player creatingPlayer)
     {
-        return createClaim(world, x1, x2, y1, y2, z1, z2, coreBlock, expireDate, ownerID, parent, id, creatingPlayer, false);
+        return createClaim(world, x1, x2, y1, y2, z1, z2, coreBlock, isPlacedByPlayer, expireDate, ownerID, parent, id, creatingPlayer, false);
     }
 
     //creates a claim.
@@ -867,7 +875,7 @@ public abstract class DataStore
     //does NOT check a player has permission to create a claim, or enough claim blocks.
     //does NOT check minimum claim size constraints
     //does NOT visualize the new claim for any players
-    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2, Location coreBlock, LocalDateTime expireDate, UUID ownerID, Claim parent, Long id, Player creatingPlayer, boolean dryRun)
+    synchronized public CreateClaimResult createClaim(World world, int x1, int x2, int y1, int y2, int z1, int z2, Location coreBlock, boolean isPlacedByPlayer, LocalDateTime expireDate, UUID ownerID, Claim parent, Long id, Player creatingPlayer, boolean dryRun)
     {
         CreateClaimResult result = new CreateClaimResult();
 
@@ -943,6 +951,7 @@ public abstract class DataStore
                 smallerBoundaryCorner,
                 greaterBoundaryCorner,
                 coreBlock,
+                isPlacedByPlayer,
                 expireDate,
                 ownerID,
                 new ArrayList<>(),
@@ -1176,7 +1185,7 @@ public abstract class DataStore
     synchronized public CreateClaimResult resizeClaim(Claim claim, int newx1, int newx2, int newy1, int newy2, int newz1, int newz2, Player resizingPlayer)
     {
         //try to create this new claim, ignoring the original when checking for overlap
-        CreateClaimResult result = this.createClaim(claim.getLesserBoundaryCorner().getWorld(), newx1, newx2, newy1, newy2, newz1, newz2, claim.coreBlockLocation, claim.expirationDate, claim.ownerID, claim.parent, claim.id, resizingPlayer, true);
+        CreateClaimResult result = this.createClaim(claim.getLesserBoundaryCorner().getWorld(), newx1, newx2, newy1, newy2, newz1, newz2, claim.coreBlockLocation, claim.isPlacedByPlayer, claim.expirationDate, claim.ownerID, claim.parent, claim.id, resizingPlayer, true);
 
         //if succeeded
         if (result.succeeded)

@@ -171,12 +171,21 @@ public class ClaimCommand extends CommandHandler
     {
         World world = player.getWorld();
         var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
+
+        var block = player.getLocation().getBlock();
+        boolean isPlacedByPlayer = true;
+        if (!block.getType().equals(Constants.CORE_BLOCK_MATERIAL)) {
+            block.setType(Constants.CORE_BLOCK_MATERIAL);
+            isPlacedByPlayer = false;
+        }
+
         CreateClaimResult result = plugin.dataStore.createClaim(world,
                 lesser.getBlockX(), greater.getBlockX(),
                 lesser.getBlockY() - plugin.config_claims_claimsExtendIntoGroundDistance - 1,
                 world.getHighestBlockYAt(greater) - plugin.config_claims_claimsExtendIntoGroundDistance - 1,
                 lesser.getBlockZ(), greater.getBlockZ(),
-                player.getLocation(),
+                block.getLocation(),
+                isPlacedByPlayer,
                 expires,
                 ownerId, null, null, player);
         if (!result.succeeded || result.claim == null)
@@ -210,7 +219,6 @@ public class ClaimCommand extends CommandHandler
             playerData.lastShovelLocation = null;
 
             AutoExtendClaimTask.scheduleAsync(result.claim);
-
         }
     }
 

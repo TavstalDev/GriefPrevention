@@ -48,7 +48,7 @@ public class DatabaseDataStore extends DataStore
     private static final String SQL_UPDATE_NAME =
             "UPDATE griefprevention_playerdata SET name = ? WHERE name = ?";
     private static final String SQL_INSERT_CLAIM =
-            "INSERT INTO griefprevention_claimdata (id, owner, lessercorner, greatercorner, coreblock, expires, builders, containers, accessors, managers, inheritnothing, parentid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO griefprevention_claimdata (id, owner, lessercorner, greatercorner, coreblock, placedbyplayer, expires, builders, containers, accessors, managers, inheritnothing, parentid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_DELETE_CLAIM =
             "DELETE FROM griefprevention_claimdata WHERE id = ?";
     private static final String SQL_SELECT_PLAYER_DATA =
@@ -102,7 +102,7 @@ public class DatabaseDataStore extends DataStore
         {
             //ensure the data tables exist
             statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_nextclaimid (nextid INTEGER)");
-            statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_claimdata (id INTEGER, owner VARCHAR(50), lessercorner VARCHAR(100), greatercorner VARCHAR(100), coreblock VARCHAR(100), expires TEXT, builders TEXT, containers TEXT, accessors TEXT, managers TEXT, inheritnothing BOOLEAN, parentid INTEGER)");
+            statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_claimdata (id INTEGER, owner VARCHAR(50), lessercorner VARCHAR(100), greatercorner VARCHAR(100), coreblock VARCHAR(100), placedbyplayer BOOLEAN, expires TEXT, builders TEXT, containers TEXT, accessors TEXT, managers TEXT, inheritnothing BOOLEAN, parentid INTEGER)");
             statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_playerdata (name VARCHAR(50), lastlogin DATETIME, accruedblocks INTEGER, bonusblocks INTEGER)");
             statement.execute("CREATE TABLE IF NOT EXISTS griefprevention_schemaversion (version INTEGER)");
 
@@ -282,6 +282,7 @@ public class DatabaseDataStore extends DataStore
                 Location lesserBoundaryCorner = null;
                 Location greaterBoundaryCorner = null;
                 Location coreBlockLocation = null;
+                boolean isPlacedByPlayer = results.getBoolean("placedbyplayer");
                 String lesserCornerString = "(location not available)";
                 try
                 {
@@ -351,7 +352,7 @@ public class DatabaseDataStore extends DataStore
                 String managersString = results.getString("managers");
                 List<String> managerNames = Arrays.asList(managersString.split(";"));
                 managerNames = this.convertNameListToUUIDList(managerNames);
-                Claim claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, ownerID, builderNames, containerNames, accessorNames, managerNames, inheritNothing, claimID);
+                Claim claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, isPlacedByPlayer, expireDate, ownerID, builderNames, containerNames, accessorNames, managerNames, inheritNothing, claimID);
 
                 if (removeClaim)
                 {
@@ -460,13 +461,14 @@ public class DatabaseDataStore extends DataStore
             insertStmt.setString(3, lesserCornerString);
             insertStmt.setString(4, greaterCornerString);
             insertStmt.setString(5, coreBlockString);
-            insertStmt.setString(6, claim.expirationDate.toString());
-            insertStmt.setString(7, buildersString);
-            insertStmt.setString(8, containersString);
-            insertStmt.setString(9, accessorsString);
-            insertStmt.setString(10, managersString);
-            insertStmt.setBoolean(11, inheritNothing);
-            insertStmt.setLong(12, parentId);
+            insertStmt.setBoolean(6, claim.isPlacedByPlayer);
+            insertStmt.setString(7, claim.expirationDate.toString());
+            insertStmt.setString(8, buildersString);
+            insertStmt.setString(9, containersString);
+            insertStmt.setString(10, accessorsString);
+            insertStmt.setString(11, managersString);
+            insertStmt.setBoolean(12, inheritNothing);
+            insertStmt.setLong(13, parentId);
             insertStmt.executeUpdate();
         }
         catch (SQLException e)

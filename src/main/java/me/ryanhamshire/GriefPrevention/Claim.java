@@ -63,6 +63,7 @@ public class Claim
 
     public Location coreBlockLocation;
     public LocalDateTime expirationDate;
+    public boolean isPlacedByPlayer; // Whether the core block was placed by a player or not. Used for prevent duping of core blocks.
 
 
     //modification date.  this comes from the file timestamp during load, and is updated with runtime changes
@@ -124,7 +125,7 @@ public class Claim
     }
 
     //main constructor.  note that only creating a claim instance does nothing - a claim must be added to the data store to be effective
-    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, Location coreBlockLocation, LocalDateTime expirationDate, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, boolean inheritNothing, Long id)
+    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, Location coreBlockLocation, boolean isPlacedByPlayer, LocalDateTime expirationDate, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, boolean inheritNothing, Long id)
     {
         //modification date
         this.modifiedDate = Calendar.getInstance().getTime();
@@ -134,6 +135,7 @@ public class Claim
 
         // core block location
         this.coreBlockLocation = coreBlockLocation;
+        this.isPlacedByPlayer = isPlacedByPlayer;
         // expiration date
         this.expirationDate = expirationDate;
 
@@ -188,9 +190,9 @@ public class Claim
         this.inheritNothing = inheritNothing;
     }
 
-    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, Location coreBlockLocation, LocalDateTime expirationDate, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, Long id)
+    Claim(Location lesserBoundaryCorner, Location greaterBoundaryCorner, Location coreBlockLocation, boolean isPlacedByPlayer, LocalDateTime expirationDate, UUID ownerID, List<String> builderIDs, List<String> containerIDs, List<String> accessorIDs, List<String> managerIDs, Long id)
     {
-        this(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expirationDate, ownerID, builderIDs, containerIDs, accessorIDs, managerIDs, false, id);
+        this(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, isPlacedByPlayer, expirationDate, ownerID, builderIDs, containerIDs, accessorIDs, managerIDs, false, id);
     }
 
     //produces a copy of a claim.
@@ -198,6 +200,7 @@ public class Claim
         this.modifiedDate = claim.modifiedDate;
         this.coreBlockLocation = claim.coreBlockLocation;
         this.expirationDate = claim.expirationDate;
+        this.isPlacedByPlayer = claim.isPlacedByPlayer;
         this.lesserBoundaryCorner = claim.greaterBoundaryCorner.clone();
         this.greaterBoundaryCorner = claim.greaterBoundaryCorner.clone();
         this.id = claim.id;
@@ -254,7 +257,7 @@ public class Claim
         Claim claim = new Claim
                 (new Location(this.lesserBoundaryCorner.getWorld(), this.lesserBoundaryCorner.getBlockX() - howNear, this.lesserBoundaryCorner.getBlockY(), this.lesserBoundaryCorner.getBlockZ() - howNear),
                         new Location(this.greaterBoundaryCorner.getWorld(), this.greaterBoundaryCorner.getBlockX() + howNear, this.greaterBoundaryCorner.getBlockY(), this.greaterBoundaryCorner.getBlockZ() + howNear),
-                        null, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
+                         null, false, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
 
         return claim.contains(location, false, true);
     }

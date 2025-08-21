@@ -282,6 +282,10 @@ public class FlatFileDataStore extends DataStore
                         line = inStream.readLine();
                         Location coreBlockLocation = this.locationFromString(line, validWorlds);
 
+                        // placed by player
+                        line = inStream.readLine();
+                        boolean isPlacedByPlayer = Boolean.parseBoolean(line);
+
                         // expire date
                         line = inStream.readLine();
                         LocalDateTime expireDate = LocalDateTime.parse(line);
@@ -350,7 +354,7 @@ public class FlatFileDataStore extends DataStore
                         if (topLevelClaim == null)
                         {
                             //instantiate
-                            topLevelClaim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, ownerID, builderNames, containerNames, accessorNames, managerNames, claimID);
+                            topLevelClaim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, isPlacedByPlayer, expireDate, ownerID, builderNames, containerNames, accessorNames, managerNames, claimID);
 
                             topLevelClaim.modifiedDate = new Date(files[i].lastModified());
                             this.addClaim(topLevelClaim, false);
@@ -359,7 +363,7 @@ public class FlatFileDataStore extends DataStore
                         //otherwise there's already a top level claim, so this must be a subdivision of that top level claim
                         else
                         {
-                            Claim subdivision = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, null, builderNames, containerNames, accessorNames, managerNames, null);
+                            Claim subdivision = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, isPlacedByPlayer, expireDate, null, builderNames, containerNames, accessorNames, managerNames, null);
 
                             subdivision.modifiedDate = new Date(files[i].lastModified());
                             subdivision.parent = topLevelClaim;
@@ -502,6 +506,7 @@ public class FlatFileDataStore extends DataStore
         Location lesserBoundaryCorner = this.locationFromString(yaml.getString("Lesser Boundary Corner"), validWorlds);
         Location greaterBoundaryCorner = this.locationFromString(yaml.getString("Greater Boundary Corner"), validWorlds);
         Location coreBlockLocation = this.locationFromString(yaml.getString("Core Block Location"), validWorlds);
+        boolean isPlacedByPlayer = yaml.getBoolean("Placed By Player", false);
         LocalDateTime expireDate = LocalDateTime.parse(yaml.getString("Expires"));
 
         //owner
@@ -533,7 +538,7 @@ public class FlatFileDataStore extends DataStore
         out_parentID.add(yaml.getLong("Parent Claim ID", -1L));
 
         //instantiate
-        claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, expireDate, ownerID, builders, containers, accessors, managers, inheritNothing, claimID);
+        claim = new Claim(lesserBoundaryCorner, greaterBoundaryCorner, coreBlockLocation, isPlacedByPlayer, expireDate, ownerID, builders, containers, accessors, managers, inheritNothing, claimID);
         claim.modifiedDate = new Date(lastModifiedDate);
         claim.id = claimID;
 
@@ -548,7 +553,7 @@ public class FlatFileDataStore extends DataStore
         yaml.set("Lesser Boundary Corner", this.locationToString(claim.lesserBoundaryCorner));
         yaml.set("Greater Boundary Corner", this.locationToString(claim.greaterBoundaryCorner));
         yaml.set("Core Block Location", this.locationToString(claim.coreBlockLocation));
-
+        yaml.set("Placed By Player", claim.isPlacedByPlayer);
         yaml.set("Expires", claim.expirationDate.toString());
 
         //owner

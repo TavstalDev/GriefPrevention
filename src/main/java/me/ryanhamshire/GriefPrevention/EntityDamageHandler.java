@@ -488,7 +488,7 @@ public class EntityDamageHandler implements Listener
         else
         {
             // Create a dummy claim to signify blanket pet protection.
-            claim = new Claim(event.damaged().getLocation(), event.damaged().getLocation(), null, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
+            claim = new Claim(event.damaged().getLocation(), event.damaged().getLocation(), null, false, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
         }
 
         PreventPvPEvent pvpEvent = new PreventPvPEvent(claim, attacker, pet);

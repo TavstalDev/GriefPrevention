@@ -140,9 +140,6 @@ public class GriefPrevention extends JavaPlugin
     public int config_claims_blocksAccruedPerHour_default;            //how many additional blocks players get each hour of play (can be zero) without any special permissions
     public int config_claims_maxAccruedBlocks_default;                //the limit on accrued blocks (over time) for players without any special permissions.  doesn't limit purchased or admin-gifted blocks
     public int config_claims_maxDepth;                                //limit on how deep claims can go
-    public int config_claims_expirationDays;                        //how many days of inactivity before a player loses his claims
-    public int config_claims_expirationExemptionTotalBlocks;        //total claim blocks amount which will exempt a player from claim expiration
-    public int config_claims_expirationExemptionBonusBlocks;        //bonus claim blocks amount which will exempt a player from claim expiration
 
     public int config_claims_automaticClaimsForNewPlayersRadius;    //how big automatic new player claims (when they place a chest) should be.  -1 to disable
     public int config_claims_automaticClaimsForNewPlayersRadiusMin; //how big automatic new player claims must be. 0 to disable
@@ -150,7 +147,6 @@ public class GriefPrevention extends JavaPlugin
     public int config_claims_minWidth;                                //minimum width for non-admin claims
     public int config_claims_minArea;                               //minimum area for non-admin claims
 
-    public int config_claims_chestClaimExpirationDays;                //number of days of inactivity before an automatic chest claim will be deleted
     public boolean config_claims_allowTrappedInAdminClaims;            //whether it should be allowed to use /trapped in adminclaims.
 
     public Material config_claims_investigationTool;                //which material will be used to investigate claims with a right click
@@ -289,6 +285,14 @@ public class GriefPrevention extends JavaPlugin
         this.spiGUI = new SpiGUI(this);
 
         AddLogEntry("Finished loading configuration.");
+
+        // check if FancyHolograms is installed
+        if (this.getServer().getPluginManager().getPlugin("FancyHolograms") == null)
+        {
+            AddLogEntry("FancyHolograms was not detected, please install it to use holograms.");
+            this.getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         //when datastore initializes, it loads player and claim data, and posts some stats to the log
         if (this.databaseUrl.length() > 0)
@@ -573,10 +577,6 @@ public class GriefPrevention extends JavaPlugin
             this.config_claims_maxDepth = Integer.MIN_VALUE;
             AddLogEntry("Updated default value for GriefPrevention.Claims.MaximumDepth to " + Integer.MIN_VALUE);
         }
-        this.config_claims_chestClaimExpirationDays = config.getInt("GriefPrevention.Claims.Expiration.ChestClaimDays", 7);
-        this.config_claims_expirationDays = config.getInt("GriefPrevention.Claims.Expiration.AllClaims.DaysInactive", 60);
-        this.config_claims_expirationExemptionTotalBlocks = config.getInt("GriefPrevention.Claims.Expiration.AllClaims.ExceptWhenOwnerHasTotalClaimBlocks", 10000);
-        this.config_claims_expirationExemptionBonusBlocks = config.getInt("GriefPrevention.Claims.Expiration.AllClaims.ExceptWhenOwnerHasBonusClaimBlocks", 5000);
         this.config_claims_allowTrappedInAdminClaims = config.getBoolean("GriefPrevention.Claims.AllowTrappedInAdminClaims", false);
 
         this.config_claims_maxClaimsPerPlayer = config.getInt("GriefPrevention.Claims.MaximumNumberOfClaimsPerPlayer", 0);
@@ -731,10 +731,6 @@ public class GriefPrevention extends JavaPlugin
         outConfig.set("GriefPrevention.Claims.MaximumDepth", this.config_claims_maxDepth);
         outConfig.set("GriefPrevention.Claims.InvestigationTool", this.config_claims_investigationTool.name());
         outConfig.set("GriefPrevention.Claims.ModificationTool", this.config_claims_modificationTool.name());
-        outConfig.set("GriefPrevention.Claims.Expiration.ChestClaimDays", this.config_claims_chestClaimExpirationDays);
-        outConfig.set("GriefPrevention.Claims.Expiration.AllClaims.DaysInactive", this.config_claims_expirationDays);
-        outConfig.set("GriefPrevention.Claims.Expiration.AllClaims.ExceptWhenOwnerHasTotalClaimBlocks", this.config_claims_expirationExemptionTotalBlocks);
-        outConfig.set("GriefPrevention.Claims.Expiration.AllClaims.ExceptWhenOwnerHasBonusClaimBlocks", this.config_claims_expirationExemptionBonusBlocks);
         outConfig.set("GriefPrevention.Claims.AllowTrappedInAdminClaims", this.config_claims_allowTrappedInAdminClaims);
         outConfig.set("GriefPrevention.Claims.MaximumNumberOfClaimsPerPlayer", this.config_claims_maxClaimsPerPlayer);
         outConfig.set("GriefPrevention.Claims.VillagerTradingRequiresPermission", this.config_claims_villagerTradingRequiresTrust);

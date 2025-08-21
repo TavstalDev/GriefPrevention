@@ -391,7 +391,7 @@ public class BlockEventHandler implements Listener
                 if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius == 0)
                 {
                     var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
-                    this.dataStore.createClaim(block.getWorld(), block.getX(), block.getX(), block.getY(), block.getY(), block.getZ(), block.getZ(), block.getLocation(), expires, player.getUniqueId(), null, null, player);
+                    this.dataStore.createClaim(block.getWorld(), block.getX(), block.getX(), block.getY(), block.getY(), block.getZ(), block.getZ(), block.getLocation(), true, expires, player.getUniqueId(), null, null, player);
                     GriefPrevention.sendMessage(player, TextMode.Success, Messages.ChestClaimConfirmation);
                 }
 
@@ -420,6 +420,7 @@ public class BlockEventHandler implements Listener
                                     block.getY() - GriefPrevention.instance.config_claims_claimsExtendIntoGroundDistance, block.getY(),
                                     block.getZ() - radius, block.getZ() + radius,
                                     block.getLocation(),
+                                    true,
                                     expires,
                                     player.getUniqueId(),
                                     null, null,
