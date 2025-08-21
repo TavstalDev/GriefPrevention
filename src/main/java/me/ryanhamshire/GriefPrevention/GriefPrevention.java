@@ -24,8 +24,12 @@ import com.griefprevention.commands.ClaimCommand;
 import com.griefprevention.metrics.MetricsHandler;
 import com.griefprevention.protection.ProtectionHelper;
 import com.samjakob.spigui.SpiGUI;
+import io.github.tavstaldev.commands.BuyClaimBlocksCommand;
 import io.github.tavstaldev.commands.ClaimsCommand;
+import io.github.tavstaldev.commands.SellClaimBlocksCommand;
 import io.github.tavstaldev.hologram.RefreshClaimHologramTask;
+import io.github.tavstaldev.util.EconomyUtils;
+import io.github.tavstaldev.util.PermissionUtils;
 import me.ryanhamshire.GriefPrevention.DataStore.NoTransferException;
 import me.ryanhamshire.GriefPrevention.events.SaveTrappedPlayerEvent;
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent;
@@ -71,6 +75,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -136,6 +141,7 @@ public class GriefPrevention extends JavaPlugin
     public boolean config_claims_villagerTradingRequiresTrust;      //whether trading with a claimed villager requires permission
 
     public int config_claims_initialBlocks;                            //the number of claim blocks a new player starts with
+    public List<Map<String, Integer>> config_claims_initialBlocksByPermission; //the number of claim blocks a new player starts with, by permission node
     public double config_claims_abandonReturnRatio;                 //the portion of claim blocks returned to a player when a claim is abandoned
     public int config_claims_blocksAccruedPerHour_default;            //how many additional blocks players get each hour of play (can be zero) without any special permissions
     public int config_claims_maxAccruedBlocks_default;                //the limit on accrued blocks (over time) for players without any special permissions.  doesn't limit purchased or admin-gifted blocks
@@ -286,13 +292,38 @@ public class GriefPrevention extends JavaPlugin
 
         AddLogEntry("Finished loading configuration.");
 
+        // check if permissions plugin is installed
+        if (!PermissionUtils.setupPermissions()) {
+            AddLogEntry("Permissions plugin with Vault API support was not found. Unloading...");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+        else
+        {
+            AddLogEntry("Permissions plugin found and hooked into Vault.");
+            if (!PermissionUtils.hasGroupSupport())
+                AddLogEntry("Permissions plugin does not support groups, some features may not work as expected.");
+        }
+
+        // check if economy plugin is installed
+        if (!EconomyUtils.setupEconomy())
+        {
+            AddLogEntry("Economy plugin not found. Unloading...");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+        else
+            AddLogEntry("Economy plugin found and hooked into Vault.");
+
         // check if FancyHolograms is installed
         if (this.getServer().getPluginManager().getPlugin("FancyHolograms") == null)
         {
             AddLogEntry("FancyHolograms was not detected, please install it to use holograms.");
-            this.getServer().getPluginManager().disablePlugin(this);
+            Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
+        else
+            AddLogEntry("FancyHolograms plugin found and hooked into it.");
 
         //when datastore initializes, it loads player and claim data, and posts some stats to the log
         if (this.databaseUrl.length() > 0)
@@ -559,6 +590,24 @@ public class GriefPrevention extends JavaPlugin
         this.config_claims_enderPearlsRequireAccessTrust = config.getBoolean("GriefPrevention.Claims.EnderPearlsRequireAccessTrust", true);
         this.config_claims_raidTriggersRequireBuildTrust = config.getBoolean("GriefPrevention.Claims.RaidTriggersRequireBuildTrust", true);
         this.config_claims_initialBlocks = config.getInt("GriefPrevention.Claims.InitialBlocks", 100);
+        List<Map<?, ?>> rawList = config.getMapList("GriefPrevention.Claims.InitialBlocksByPermission");
+        List<Map<String, Integer>> typedList = new ArrayList<>();
+
+        for (Map<?, ?> rawMap : rawList) {
+            // Safe casting the map to the desired type
+            @SuppressWarnings("unchecked")
+            Map<String, Integer> castedMap = (Map<String, Integer>) rawMap;
+            typedList.add(castedMap);
+        }
+
+        // Add default values if the list is empty
+        if (typedList.isEmpty()) {
+            typedList.add(Map.of("vip", 200));
+            typedList.add(Map.of("mvp", 300));
+        }
+
+        // Assign the new list to your field
+        this.config_claims_initialBlocksByPermission = typedList;
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.BlocksAccruedPerHour", 100);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.Claim Blocks Accrued Per Hour.Default", config_claims_blocksAccruedPerHour_default);
         this.config_claims_maxAccruedBlocks_default = config.getInt("GriefPrevention.Claims.MaxAccruedBlocks", 80000);
@@ -720,6 +769,7 @@ public class GriefPrevention extends JavaPlugin
         outConfig.set("GriefPrevention.Claims.ProtectDonkeys", this.config_claims_protectDonkeys);
         outConfig.set("GriefPrevention.Claims.ProtectLlamas", this.config_claims_protectLlamas);
         outConfig.set("GriefPrevention.Claims.InitialBlocks", this.config_claims_initialBlocks);
+        outConfig.set("GriefPrevention.Claims.InitialBlocksByPermission", this.config_claims_initialBlocksByPermission);
         outConfig.set("GriefPrevention.Claims.Claim Blocks Accrued Per Hour.Default", this.config_claims_blocksAccruedPerHour_default);
         outConfig.set("GriefPrevention.Claims.Max Accrued Claim Blocks.Default", this.config_claims_maxAccruedBlocks_default);
         outConfig.set("GriefPrevention.Claims.AbandonReturnRatio", this.config_claims_abandonReturnRatio);
@@ -947,6 +997,8 @@ public class GriefPrevention extends JavaPlugin
     {
         new ClaimCommand(this);
         new ClaimsCommand(this);
+        new BuyClaimBlocksCommand(this);
+        new SellClaimBlocksCommand(this);
     }
 
     //handles slash commands
