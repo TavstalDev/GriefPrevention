@@ -26,7 +26,7 @@ import com.griefprevention.protection.ProtectionHelper;
 import com.samjakob.spigui.SpiGUI;
 import io.github.tavstaldev.commands.BuyClaimBlocksCommand;
 import io.github.tavstaldev.commands.ClaimsCommand;
-import io.github.tavstaldev.commands.SellClaimBlocksCommand;
+import io.github.tavstaldev.commands.PriceClaimBlocksCommand;
 import io.github.tavstaldev.hologram.RefreshClaimHologramTask;
 import io.github.tavstaldev.util.EconomyUtils;
 import io.github.tavstaldev.util.PermissionUtils;
@@ -69,12 +69,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -96,6 +98,9 @@ public class GriefPrevention extends JavaPlugin
 
     //for logging to the console and log file
     private static Logger log;
+
+    // for formatting decimal numbers
+    public static final NumberFormat numberFormatter = NumberFormat.getNumberInstance(Locale.US);
 
     //this handles data storage, like player and region data
     public DataStore dataStore;
@@ -142,6 +147,7 @@ public class GriefPrevention extends JavaPlugin
 
     public int config_claims_initialBlocks;                            //the number of claim blocks a new player starts with
     public List<Map<String, Integer>> config_claims_initialBlocksByPermission; //the number of claim blocks a new player starts with, by permission node
+    public double config_claims_pricePerBlock;                      //the price per claim block, in the economy currency
     public double config_claims_abandonReturnRatio;                 //the portion of claim blocks returned to a player when a claim is abandoned
     public int config_claims_blocksAccruedPerHour_default;            //how many additional blocks players get each hour of play (can be zero) without any special permissions
     public int config_claims_maxAccruedBlocks_default;                //the limit on accrued blocks (over time) for players without any special permissions.  doesn't limit purchased or admin-gifted blocks
@@ -608,6 +614,7 @@ public class GriefPrevention extends JavaPlugin
 
         // Assign the new list to your field
         this.config_claims_initialBlocksByPermission = typedList;
+        this.config_claims_pricePerBlock = config.getDouble("GriefPrevention.Claims.PricePerBlock", 100.0D);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.BlocksAccruedPerHour", 100);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.Claim Blocks Accrued Per Hour.Default", config_claims_blocksAccruedPerHour_default);
         this.config_claims_maxAccruedBlocks_default = config.getInt("GriefPrevention.Claims.MaxAccruedBlocks", 80000);
@@ -771,6 +778,7 @@ public class GriefPrevention extends JavaPlugin
         outConfig.set("GriefPrevention.Claims.InitialBlocks", this.config_claims_initialBlocks);
         outConfig.set("GriefPrevention.Claims.InitialBlocksByPermission", this.config_claims_initialBlocksByPermission);
         outConfig.set("GriefPrevention.Claims.Claim Blocks Accrued Per Hour.Default", this.config_claims_blocksAccruedPerHour_default);
+        outConfig.set("GriefPrevention.Claims.Price Per Block", this.config_claims_pricePerBlock);
         outConfig.set("GriefPrevention.Claims.Max Accrued Claim Blocks.Default", this.config_claims_maxAccruedBlocks_default);
         outConfig.set("GriefPrevention.Claims.AbandonReturnRatio", this.config_claims_abandonReturnRatio);
         outConfig.set("GriefPrevention.Claims.AutomaticNewPlayerClaimsRadius", this.config_claims_automaticClaimsForNewPlayersRadius);
@@ -998,7 +1006,7 @@ public class GriefPrevention extends JavaPlugin
         new ClaimCommand(this);
         new ClaimsCommand(this);
         new BuyClaimBlocksCommand(this);
-        new SellClaimBlocksCommand(this);
+        new PriceClaimBlocksCommand(this);
     }
 
     //handles slash commands
