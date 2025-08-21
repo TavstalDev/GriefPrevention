@@ -1,6 +1,6 @@
 name: GriefPrevention
 main: me.ryanhamshire.GriefPrevention.GriefPrevention
-softdepend: [Multiverse-Core, My_Worlds, MystCraft, Transporter, RoyalCommands, MultiWorld, Denizen, CommandHelper, FancyHolograms]
+softdepend: [Multiverse-Core, My_Worlds, MystCraft, Transporter, RoyalCommands, MultiWorld, Denizen, CommandHelper, Vault, FancyHolograms]
 dev-url: https://dev.bukkit.org/projects/grief-prevention
 version: '${git.commit.id.describe}'
 api-version: '1.20'
@@ -185,6 +185,14 @@ commands:
       description: Wrapper command for all claim-related commands.
       usage: /<command>
       aliases: [ tc, regions, zones, land ]
+      permission: griefprevention.claims
+    buyclaimblocks:
+      description: Buys claim blocks using economy.
+      usage: /<command> <amount>
+      permission: griefprevention.claims
+    sellclaimblocks:
+      description: Sells claim blocks using economy.
+      usage: /<command> <amount>
       permission: griefprevention.claims
 permissions:
     griefprevention.createclaims:
