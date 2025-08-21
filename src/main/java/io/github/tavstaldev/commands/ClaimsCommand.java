@@ -40,6 +40,8 @@ public class ClaimsCommand extends CommandHandler
             GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandUntrust);
             GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandUntrustAll);
             GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandToggleExplosions);
+            GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandBuyClaimBlocks);
+            GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandPriceOfClaimBlocks);
             return true;
         }
 
@@ -107,6 +109,19 @@ public class ClaimsCommand extends CommandHandler
             }
             case "explosions":
                 return Bukkit.dispatchCommand(player, "claimexplosions");
+            case "buyblocks":
+            {
+                if (args.length < 2)
+                {
+                    GriefPrevention.sendMessage(player, TextMode.Info, Messages.CommandBuyClaimBlocks);
+                    return true;
+                }
+                return Bukkit.dispatchCommand(player, "buyclaimblocks " + args[1]);
+            }
+            case "price":
+            {
+                return Bukkit.dispatchCommand(player, "priceofclaimblocks");
+            }
         }
         return true;
     }
