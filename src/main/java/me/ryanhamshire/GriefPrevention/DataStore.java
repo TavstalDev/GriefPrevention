@@ -1404,12 +1404,6 @@ public abstract class DataStore
             }
             config.set(messagePath, this.messages[message.ordinal()]);
 
-            //support color codes
-            if (message != Messages.HowToClaimRegex)
-            {
-                this.messages[message.ordinal()] = this.messages[message.ordinal()].replace('$', (char) 0x00A7);
-            }
-
             if (message.notes != null)
             {
                 // Import old non-comment notes.
@@ -1429,7 +1423,7 @@ public abstract class DataStore
             config.options().setHeader(List.of(
                     "Use a YAML editor like NotepadPlusPlus to edit this file.",
                     "After editing, back up your changes before reloading the server in case you made a syntax error.",
-                    "Use dollar signs ($) for formatting codes, which are documented here: http://minecraft.wiki/Formatting_codes#Color_codes"
+                    "Use section symbols (§) for formatting codes, which are documented here: http://minecraft.wiki/Formatting_codes#Color_codes"
             ));
             config.save(DataStore.messagesFilePath);
         }
