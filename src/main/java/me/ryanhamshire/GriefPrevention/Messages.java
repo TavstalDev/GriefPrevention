@@ -250,6 +250,7 @@ public enum Messages
     GuiClaimInformationOwner("$7Owner: $e{0}"),
     GuiClaimInformationNoOwner("$7Owner: $cUnknown"),
     GuiClaimInformationSize("$7Size: $e{0}$7x$e{1}"),
+    GuiClaimInformationMaxSize("$7Max Size: $e{0}$7x$e{1}"),
     GuiClaimInformationMembers("$7Members: $a{0}"),
 
     GuiTimeInformation("$fTime Information"),

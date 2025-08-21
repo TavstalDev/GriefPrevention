@@ -186,6 +186,12 @@ public class MainGUI {
             translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiClaimInformationSize, String.valueOf(claim.getWidth()), String.valueOf(claim.getHeight()));
             loreList.add(translation);
 
+            // Max Size
+            var playerClaimData = GriefPrevention.instance.dataStore.getPlayerData(playerId);
+            int maxSize = (int)Math.sqrt(playerClaimData.getAccruedClaimBlocks());
+            translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiClaimInformationMaxSize, String.valueOf(maxSize), String.valueOf(maxSize));
+            loreList.add(translation);
+
             // Members
             translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiClaimInformationMembers, String.valueOf(builders.size()));
             loreList.add(translation);
