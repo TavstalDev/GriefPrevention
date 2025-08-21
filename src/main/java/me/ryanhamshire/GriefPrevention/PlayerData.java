@@ -19,6 +19,7 @@
 package me.ryanhamshire.GriefPrevention;
 
 import com.griefprevention.visualization.BoundaryVisualization;
+import io.github.tavstaldev.util.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -129,6 +131,8 @@ public class PlayerData
     //profanity warning, once per play session
     boolean profanityWarned = false;
 
+    private @Nullable String cachedGroup = null;
+
     //whether or not this player is "in" pvp combat
     public boolean inPvpCombat()
     {
@@ -184,6 +188,18 @@ public class PlayerData
     {
         if (this.accruedClaimBlocks == null) this.loadDataFromSecondaryStorage();
 
+        // update claim blocks if group changed
+        if (PermissionUtils.hasGroupSupport())
+        {
+            String primaryGroup = PermissionUtils.getPrimaryGroup(Bukkit.getOfflinePlayer(this.playerID));
+            if (!Objects.equals(primaryGroup, cachedGroup))
+            {
+                int defaultClaimBlocks = this.getDefaultClaimBlocks();
+                if (this.accruedClaimBlocks < defaultClaimBlocks)
+                    this.accruedClaimBlocks = defaultClaimBlocks;
+            }
+        }
+
         //update claim blocks with any he has accrued during his current play session
         if (this.newlyAccruedClaimBlocks > 0)
         {
@@ -230,20 +246,20 @@ public class PlayerData
 
         if (this.accruedClaimBlocks == null)
         {
+            int defaultClaimBlocks = this.getDefaultClaimBlocks();
             if (storageData.accruedClaimBlocks != null)
             {
                 this.accruedClaimBlocks = storageData.accruedClaimBlocks;
 
                 //ensure at least minimum accrued are accrued (in case of settings changes to increase initial amount)
-                if (GriefPrevention.instance.config_advanced_fixNegativeClaimblockAmounts && (this.accruedClaimBlocks < GriefPrevention.instance.config_claims_initialBlocks))
+                if (GriefPrevention.instance.config_advanced_fixNegativeClaimblockAmounts && (this.accruedClaimBlocks < defaultClaimBlocks))
                 {
-                    this.accruedClaimBlocks = GriefPrevention.instance.config_claims_initialBlocks;
+                    this.accruedClaimBlocks = defaultClaimBlocks;
                 }
-
             }
             else
             {
-                this.accruedClaimBlocks = GriefPrevention.instance.config_claims_initialBlocks;
+                this.accruedClaimBlocks = defaultClaimBlocks;
             }
         }
 
@@ -383,4 +399,33 @@ public class PlayerData
         this.visibleBoundaries = visibleBoundaries;
     }
 
+    private int getDefaultClaimBlocks() {
+        try
+        {
+
+            OfflinePlayer offlinePlayer = GriefPrevention.instance.getServer().getOfflinePlayer(this.playerID);
+            var primaryGroup = PermissionUtils.getPrimaryGroup(offlinePlayer);
+            if (primaryGroup == null)
+                return GriefPrevention.instance.config_claims_initialBlocks;
+
+            for (var group : GriefPrevention.instance.config_claims_initialBlocksByPermission)
+            {
+                if (group.containsKey(primaryGroup))
+                {
+                    int initialBlocks = group.get(primaryGroup);
+                    if (initialBlocks > 0)
+                    {
+                        cachedGroup = primaryGroup;
+                        return initialBlocks;
+                    }
+                }
+            }
+
+            return GriefPrevention.instance.config_claims_initialBlocks;
+        }
+        catch (Exception ex) {
+            GriefPrevention.AddLogEntry("Error getting default claim blocks for player " + this.playerID + ": " + ex.getMessage(), CustomLogEntryTypes.Exception, true);
+            return GriefPrevention.instance.config_claims_initialBlocks;
+        }
+    }
 }
