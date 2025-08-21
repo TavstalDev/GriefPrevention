@@ -190,8 +190,8 @@ commands:
       description: Buys claim blocks using economy.
       usage: /<command> <amount>
       permission: griefprevention.claims
-    sellclaimblocks:
-      description: Sells claim blocks using economy.
+    priceofclaimblocks:
+      description: Shows the price of claim blocks.
       usage: /<command> <amount>
       permission: griefprevention.claims
 permissions:
