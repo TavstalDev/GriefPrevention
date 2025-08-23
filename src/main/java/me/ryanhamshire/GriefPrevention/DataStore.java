@@ -1019,21 +1019,7 @@ public abstract class DataStore
         }
         else
         {
-            var hologramLocation = newClaim.coreBlockLocation.clone();
-            hologramLocation.setX(hologramLocation.getBlockX() + 0.5); // center the hologram
-            hologramLocation.setY(hologramLocation.getBlockY() + 2);
-            hologramLocation.setZ(hologramLocation.getBlockZ() + 0.5); // center the hologram
-            TextHologramData hologramData = new TextHologramData("claim_" + newClaim.id, hologramLocation);
-            // Adjust the Hologram Data
-            hologramData.removeLine(0);
-            hologramData.addLine(getMessage(Messages.HologramTitle));
-            hologramData.addLine(getMessage(Messages.HologramOwner, newClaim.getOwnerName()));
-            hologramData.addLine(getMessage(Messages.HologramMembers, "0"));
-            hologramData.addLine(getMessage(Messages.HologramBlocks, String.valueOf(newClaim.getArea())));
-            hologramData.addLine(getMessage(Messages.HologramExpiry, newClaim.getRemainingTime()));
-
-            Hologram hologram = manager.create(hologramData);
-            manager.addHologram(hologram);
+            newClaim.createHologram();
         }
 
         //then return success along with reference to new claim
