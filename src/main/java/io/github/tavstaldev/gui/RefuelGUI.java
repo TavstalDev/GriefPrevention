@@ -147,7 +147,7 @@ public class RefuelGUI
             List<String> loreList = new ArrayList<>();
 
             // Information
-            translation = GriefPrevention.instance.dataStore.getMessage(Messages.Day, String.valueOf(Constants.MAXIMUM_FUEL_DURATION.toDays()));
+            translation = GriefPrevention.instance.dataStore.getMessage(Messages.Day, String.valueOf(Duration.ofHours(GriefPrevention.instance.config_advanced_claim_maximum_fuel_duration).toDays()));
             translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelWarningMessage, translation);
             loreList.add(translation);
             translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelWarning);
@@ -196,9 +196,9 @@ public class RefuelGUI
                     var totalFuel = remainingFuel.plus(fuelDuration);
 
                     // Check if the total fuel duration exceeds the maximum limit
-                    if (totalFuel.toSeconds() > Constants.MAXIMUM_FUEL_DURATION.toSeconds()) {
+                    if (totalFuel.toSeconds() > Duration.ofHours(GriefPrevention.instance.config_advanced_claim_maximum_fuel_duration).toSeconds()) {
                         // If it does, cap the total fuel at the maximum limit
-                        var limitedExpiration = LocalDateTime.now().plus(Constants.MAXIMUM_FUEL_DURATION);
+                        var limitedExpiration = LocalDateTime.now().plus(Duration.ofHours(GriefPrevention.instance.config_advanced_claim_maximum_fuel_duration));
 
                         // Check if the current expiration date is already beyond the max
                         if (claim.expirationDate.isAfter(limitedExpiration)) {
@@ -224,6 +224,7 @@ public class RefuelGUI
 
                     // Update the claim in the data store
                     GriefPrevention.instance.dataStore.saveClaim(claim);
+                    claim.refreshHologram();
                     GriefPrevention.sendMessage(player, TextMode.Success, Messages.GuiRefuelSuccess);
                 }));
             }
