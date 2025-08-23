@@ -233,12 +233,17 @@ public enum Messages
     CommandUntrustAll("§7/claims untrustall §8- §7Untrust all players from your claim"),
     CommandBuyClaimBlocks("§7/claims buyblocks <amount> §8- §7Buy claim blocks"),
     CommandPriceOfClaimBlocks("§7/claims price §8- §7Show the price of a claim block"),
+    CommandToggleHologram("§7/claims hologram §8- §7Toggle the display of the claim information hologram"),
 
     InvalidAmount("§cInvalid amount!"),
     NotEnoughMoney("§cYou don't have enough money!"),
     PriceOfClaimBlocks("Price of a claim block: §a${0}", "0: price per block"),
     TooManyClaimBlocks("§cYou can't have more than §e{0}§c claim blocks!", "0: maximum claim blocks allowed"),
     BoughtClaimBlocks("§aBought §e{0} §ablock(s) for §e${1}§a!", "0: amount of blocks bought, 1: total cost"),
+    CreateClaimMustStandInAir("§cYou must be standing in the air to create a claim!"),
+    ClaimMissing("§cYou are not standing in a claim!"),
+    HologramEnabled("§aClaim hologram §eenabled§a!"),
+    HologramDisabled("§aClaim hologram §edisabled§a!"),
 
     HologramTitle("§8[§6CLAIM§8]"),
     HologramOwner("§fOwner: §e{0}"),
