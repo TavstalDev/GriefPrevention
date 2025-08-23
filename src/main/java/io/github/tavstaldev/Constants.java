@@ -39,9 +39,5 @@ public class Constants
                 ));
     }
 
-    public static final Duration MAXIMUM_FUEL_DURATION = Duration.ofDays(7);
-
-    public static final Duration DEFAULT_FUEL_DURATION = Duration.ofDays(2);
-
     public static final Material CORE_BLOCK_MATERIAL = Material.BARREL;
 }

@@ -3,6 +3,7 @@ package com.griefprevention.commands;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
 import io.github.tavstaldev.Constants;
+import jdk.jfr.Timespan;
 import me.ryanhamshire.GriefPrevention.AutoExtendClaimTask;
 import me.ryanhamshire.GriefPrevention.CreateClaimResult;
 import me.ryanhamshire.GriefPrevention.DataStore;
@@ -13,6 +14,7 @@ import me.ryanhamshire.GriefPrevention.ShovelMode;
 import me.ryanhamshire.GriefPrevention.TextMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -170,11 +173,23 @@ public class ClaimCommand extends CommandHandler
             @Nullable UUID ownerId)
     {
         World world = player.getWorld();
-        var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
+        var expires = LocalDateTime.now().plus(Duration.ofHours(GriefPrevention.instance.config_advanced_claim_default_fuel_duration));
 
         var block = player.getLocation().getBlock();
+        var targetBlockType = block.getType();
+
+        if (!(targetBlockType.isAir()
+                || targetBlockType.equals(Material.SHORT_GRASS)
+                || targetBlockType.equals(Material.TALL_GRASS)
+                || targetBlockType.equals(Material.FERN)
+                || targetBlockType.equals(Material.LARGE_FERN)
+                || targetBlockType.equals(Material.DEAD_BUSH))){
+            GriefPrevention.sendMessage(player, TextMode.Err, Messages.CreateClaimMustStandInAir);
+            return;
+        }
+
         boolean isPlacedByPlayer = true;
-        if (!block.getType().equals(Constants.CORE_BLOCK_MATERIAL)) {
+        if (!targetBlockType.equals(Constants.CORE_BLOCK_MATERIAL)) {
             block.setType(Constants.CORE_BLOCK_MATERIAL);
             isPlacedByPlayer = false;
         }
@@ -190,6 +205,12 @@ public class ClaimCommand extends CommandHandler
                 ownerId, null, null, player);
         if (!result.succeeded || result.claim == null)
         {
+            if (!isPlacedByPlayer)
+            {
+                // revert the block placement
+                block.setType(targetBlockType);
+            }
+
             if (result.claim != null)
             {
                 GriefPrevention.sendMessage(player, TextMode.Err, Messages.CreateClaimFailOverlapShort);

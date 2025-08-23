@@ -27,6 +27,7 @@ import com.samjakob.spigui.SpiGUI;
 import io.github.tavstaldev.commands.BuyClaimBlocksCommand;
 import io.github.tavstaldev.commands.ClaimsCommand;
 import io.github.tavstaldev.commands.PriceClaimBlocksCommand;
+import io.github.tavstaldev.commands.ToggleHologramCommand;
 import io.github.tavstaldev.hologram.RefreshClaimHologramTask;
 import io.github.tavstaldev.util.EconomyUtils;
 import io.github.tavstaldev.util.PermissionUtils;
@@ -239,6 +240,9 @@ public class GriefPrevention extends JavaPlugin
 
     public boolean config_advanced_fixNegativeClaimblockAmounts;    //whether to attempt to fix negative claim block amounts (some addons cause/assume players can go into negative amounts)
     public int config_advanced_claim_expiration_check_rate;            //How often GP should check for expired claims, amount in seconds
+    public int config_advanced_claim_hologram_refresh_rate;         //How often holograms should be refreshed, amount in seconds
+    public int config_advanced_claim_default_fuel_duration;         //Default duration for claim fuel, in hours
+    public int config_advanced_claim_maximum_fuel_duration;         //Maximum duration for claim fuel, in hours
     public int config_advanced_offlineplayer_cache_days;            //Cache players who have logged in within the last x number of days
 
     //custom log settings
@@ -399,10 +403,10 @@ public class GriefPrevention extends JavaPlugin
 
         //start recurring cleanup scan for unused claims belonging to inactive players
         FindUnusedClaimsTask task2 = new FindUnusedClaimsTask();
-        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task2, 20L * 60, 20L * config_advanced_claim_expiration_check_rate);
+        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task2, 20L * 30, 20L * config_advanced_claim_expiration_check_rate);
 
         RefreshClaimHologramTask task3 = new RefreshClaimHologramTask();
-        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task3, 20L * 60, 20L * 60 * 2); // TODO: add config for this
+        this.getServer().getScheduler().scheduleSyncRepeatingTask(this, task3, 20L * 30, 20L * config_advanced_claim_hologram_refresh_rate);
 
         //register for events
         PluginManager pluginManager = this.getServer().getPluginManager();
@@ -744,6 +748,9 @@ public class GriefPrevention extends JavaPlugin
 
         this.config_advanced_fixNegativeClaimblockAmounts = config.getBoolean("GriefPrevention.Advanced.fixNegativeClaimblockAmounts", true);
         this.config_advanced_claim_expiration_check_rate = config.getInt("GriefPrevention.Advanced.ClaimExpirationCheckRate", 60);
+        this.config_advanced_claim_hologram_refresh_rate = config.getInt("GriefPrevention.Advanced.ClaimHologramRefreshRate", 120);
+        this.config_advanced_claim_default_fuel_duration = config.getInt("GriefPrevention.Advanced.DefaultClaimFuelDuration", 48);
+        this.config_advanced_claim_maximum_fuel_duration = config.getInt("GriefPrevention.Advanced.MaximumClaimFuelDuration", 168);
         this.config_advanced_offlineplayer_cache_days = config.getInt("GriefPrevention.Advanced.OfflinePlayer_cache_days", 90);
 
         //custom logger settings
@@ -868,6 +875,9 @@ public class GriefPrevention extends JavaPlugin
 
         outConfig.set("GriefPrevention.Advanced.fixNegativeClaimblockAmounts", this.config_advanced_fixNegativeClaimblockAmounts);
         outConfig.set("GriefPrevention.Advanced.ClaimExpirationCheckRate", this.config_advanced_claim_expiration_check_rate);
+        outConfig.set("GriefPrevention.Advanced.ClaimHologramRefreshRate", this.config_advanced_claim_hologram_refresh_rate);
+        outConfig.set("GriefPrevention.Advanced.DefaultClaimFuelDuration", this.config_advanced_claim_default_fuel_duration);
+        outConfig.set("GriefPrevention.Advanced.MaximumClaimFuelDuration", this.config_advanced_claim_maximum_fuel_duration);
         outConfig.set("GriefPrevention.Advanced.OfflinePlayer_cache_days", this.config_advanced_offlineplayer_cache_days);
 
         //custom logger settings
@@ -1007,6 +1017,7 @@ public class GriefPrevention extends JavaPlugin
         new ClaimsCommand(this);
         new BuyClaimBlocksCommand(this);
         new PriceClaimBlocksCommand(this);
+        new ToggleHologramCommand(this);
     }
 
     //handles slash commands

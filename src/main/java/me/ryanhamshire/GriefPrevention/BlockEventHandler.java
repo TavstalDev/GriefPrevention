@@ -77,6 +77,7 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -390,7 +391,7 @@ public class BlockEventHandler implements Listener
                 //radius == 0 means protect ONLY the chest
                 if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius == 0)
                 {
-                    var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
+                    var expires = LocalDateTime.now().plus(Duration.ofHours(GriefPrevention.instance.config_advanced_claim_default_fuel_duration));
                     this.dataStore.createClaim(block.getWorld(), block.getX(), block.getX(), block.getY(), block.getY(), block.getZ(), block.getZ(), block.getLocation(), true, expires, player.getUniqueId(), null, null, player);
                     GriefPrevention.sendMessage(player, TextMode.Success, Messages.ChestClaimConfirmation);
                 }
@@ -413,7 +414,7 @@ public class BlockEventHandler implements Listener
                         int area = (radius * 2 + 1) * (radius * 2 + 1);
                         if (playerData.getRemainingClaimBlocks() >= area)
                         {
-                            var expires = LocalDateTime.now().plus(Constants.DEFAULT_FUEL_DURATION);
+                            var expires = LocalDateTime.now().plus(Duration.ofHours(GriefPrevention.instance.config_advanced_claim_default_fuel_duration));
                             result = this.dataStore.createClaim(
                                     block.getWorld(),
                                     block.getX() - radius, block.getX() + radius,
