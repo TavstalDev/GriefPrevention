@@ -42,6 +42,7 @@ public class ClaimsCommand extends CommandHandler
             GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandToggleExplosions);
             GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandBuyClaimBlocks);
             GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandPriceOfClaimBlocks);
+            GriefPrevention.sendMessageNoPrefix(player, TextMode.Info, Messages.CommandToggleHologram);
             return true;
         }
 
@@ -121,6 +122,10 @@ public class ClaimsCommand extends CommandHandler
             case "price":
             {
                 return Bukkit.dispatchCommand(player, "priceofclaimblocks");
+            }
+            case "hologram":
+            {
+                return Bukkit.dispatchCommand(player, "togglehologram");
             }
         }
         return true;

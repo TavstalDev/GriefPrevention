@@ -194,6 +194,10 @@ commands:
       description: Shows the price of claim blocks.
       usage: /<command> <amount>
       permission: griefprevention.claims
+    togglehologram:
+      description: Toggles the claim hologram on or off.
+      usage: /<command>
+      permission: griefprevention.claims
 permissions:
     griefprevention.createclaims:
         description: Grants permission to create claims.
