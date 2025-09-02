@@ -600,6 +600,7 @@ public class GriefPrevention extends JavaPlugin
         this.config_claims_enderPearlsRequireAccessTrust = config.getBoolean("GriefPrevention.Claims.EnderPearlsRequireAccessTrust", true);
         this.config_claims_raidTriggersRequireBuildTrust = config.getBoolean("GriefPrevention.Claims.RaidTriggersRequireBuildTrust", true);
         this.config_claims_initialBlocks = config.getInt("GriefPrevention.Claims.InitialBlocks", 100);
+        //#region Initial Blocks By Permission
         List<Map<?, ?>> rawList = config.getMapList("GriefPrevention.Claims.InitialBlocksByPermission");
         List<Map<String, Integer>> typedList = new ArrayList<>();
 
@@ -616,8 +617,8 @@ public class GriefPrevention extends JavaPlugin
             typedList.add(Map.of("mvp", 300));
         }
 
-        // Assign the new list to your field
         this.config_claims_initialBlocksByPermission = typedList;
+        //#endregion
         this.config_claims_pricePerBlock = config.getDouble("GriefPrevention.Claims.PricePerBlock", 100.0D);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.BlocksAccruedPerHour", 100);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.Claim Blocks Accrued Per Hour.Default", config_claims_blocksAccruedPerHour_default);
