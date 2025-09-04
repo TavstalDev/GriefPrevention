@@ -1,15 +1,21 @@
 package com.griefprevention.visualization;
 
+import com.github.fierioziy.particlenativeapi.core.ParticleNativeCore;
 import com.griefprevention.util.IntVector;
+import io.github.tavstaldev.tasks.ParticleDisplayTask;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.PlayerData;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class BlockBoundaryVisualization extends BoundaryVisualization
@@ -74,6 +80,30 @@ public abstract class BlockBoundaryVisualization extends BoundaryVisualization
 
         Consumer<@NotNull IntVector> addCorner = addCornerElements(boundary);
         Consumer<@NotNull IntVector> addSide = addSideElements(boundary);
+
+        // --- Add particles along the entire perimeter ---
+        List<IntVector> particleLocations = new ArrayList<>();
+        // North and south boundaries
+        World currentWorld = player.getWorld();
+        for (int x = Math.max(area.getMinX(), displayZone.getMinX()); x <= Math.min(area.getMaxX(), displayZone.getMaxX()); x++) {
+            for (int y = -5; y < 5; y++) {
+                particleLocations.add(new IntVector(x, y, area.getMinZ()));
+                particleLocations.add(new IntVector(x, y, area.getMaxZ()));
+            }
+         }
+
+        // East and west boundaries, skipping corners
+        for (int z = Math.max(area.getMinZ() + 1, displayZone.getMinZ() + 1); z <= Math.min(area.getMaxZ() - 1, displayZone.getMaxZ() - 1); z++) {
+            for (int y = -5; y < 5; y++) {
+                particleLocations.add(new IntVector(area.getMinX(), y, z));
+                particleLocations.add(new IntVector(area.getMaxX(), y, z));
+            }
+        }
+        PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(player.getUniqueId());
+        ParticleDisplayTask task = new ParticleDisplayTask(player, playerData, this, currentWorld, particleLocations);
+        task.runTaskTimer(GriefPrevention.instance, 0L, 10L);
+        // --- End particle section ---
+
 
         // North and south boundaries
         for (int x = Math.max(area.getMinX() + step, displayZone.getMinX()); x < area.getMaxX() - step / 2 && x < displayZone.getMaxX(); x += step)

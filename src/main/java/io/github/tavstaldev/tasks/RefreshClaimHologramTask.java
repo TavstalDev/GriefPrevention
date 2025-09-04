@@ -1,4 +1,4 @@
-package io.github.tavstaldev.hologram;
+package io.github.tavstaldev.tasks;
 
 import me.ryanhamshire.GriefPrevention.CustomLogEntryTypes;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;

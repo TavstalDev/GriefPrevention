@@ -18,6 +18,8 @@
 
 package me.ryanhamshire.GriefPrevention;
 
+import com.github.fierioziy.particlenativeapi.api.ParticleNativeAPI;
+import com.github.fierioziy.particlenativeapi.core.ParticleNativeCore;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.griefprevention.commands.ClaimCommand;
@@ -28,7 +30,7 @@ import io.github.tavstaldev.commands.BuyClaimBlocksCommand;
 import io.github.tavstaldev.commands.ClaimsCommand;
 import io.github.tavstaldev.commands.PriceClaimBlocksCommand;
 import io.github.tavstaldev.commands.ToggleHologramCommand;
-import io.github.tavstaldev.hologram.RefreshClaimHologramTask;
+import io.github.tavstaldev.tasks.RefreshClaimHologramTask;
 import io.github.tavstaldev.util.EconomyUtils;
 import io.github.tavstaldev.util.PermissionUtils;
 import me.ryanhamshire.GriefPrevention.DataStore.NoTransferException;
@@ -123,6 +125,11 @@ public class GriefPrevention extends JavaPlugin
     private SpiGUI spiGUI;
     public SpiGUI GetGUI() {
         return spiGUI;
+    }
+
+    private ParticleNativeAPI particleApi;
+    public ParticleNativeAPI getParticleApi() {
+        return particleApi;
     }
 
     //#region Configuration Variables
@@ -299,6 +306,7 @@ public class GriefPrevention extends JavaPlugin
         this.customLogger = new CustomLogger();
 
         this.spiGUI = new SpiGUI(this);
+        this.particleApi = ParticleNativeCore.loadAPI(this);
 
         AddLogEntry("Finished loading configuration.");
 

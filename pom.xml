@@ -151,6 +151,10 @@
                                     <pattern>com.samjakob.spigui</pattern>
                                     <shadedPattern>com.griefprevention.shadow.spigui</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.github.fierioziy.particlenativeapi</pattern>
+                                    <shadedPattern>com.griefprevention.shadow.particleapi</shadedPattern>
+                                </relocation>
                             </relocations>
                             <!-- To ensure the original non-shaded JAR is not deployed,
                                  if you only want the shaded one. By default, it replaces the original. -->
@@ -229,6 +233,13 @@
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- Particle Effect Dependency -->
+        <dependency>
+            <groupId>com.github.fierioziy.particlenativeapi</groupId>
+            <artifactId>ParticleNativeAPI-plugin</artifactId>
+            <version>4.4.0</version>
+            <scope>compile</scope>
         </dependency>
         <!-- Annotations for nullity and other behaviors -->
         <dependency>
