@@ -152,6 +152,7 @@ public class GriefPrevention extends JavaPlugin
     public boolean config_claims_raidTriggersRequireBuildTrust;      //whether raids are triggered by a player that doesn't have build permission in that claim
     public int config_claims_maxClaimsPerPlayer;                    //maximum number of claims per player
     public boolean config_claims_villagerTradingRequiresTrust;      //whether trading with a claimed villager requires permission
+    public int config_claims_minDistanceFromSpawnToAllowClaims;                //minimum distance from world spawn point that claims will be allowed
 
     public int config_claims_initialBlocks;                            //the number of claim blocks a new player starts with
     public List<Map<String, Integer>> config_claims_initialBlocksByPermission; //the number of claim blocks a new player starts with, by permission node
@@ -655,6 +656,8 @@ public class GriefPrevention extends JavaPlugin
         this.config_claims_manualDeliveryDelaySeconds = config.getInt("GriefPrevention.Claims.ManualDeliveryDelaySeconds", 30);
         this.config_claims_ravagersBreakBlocks = config.getBoolean("GriefPrevention.Claims.RavagersBreakBlocks", true);
 
+        this.config_claims_minDistanceFromSpawnToAllowClaims = config.getInt("GriefPrevention.Claims.MinimumDistanceFromWorldSpawnToAllowClaims", 200);
+
         this.config_claims_firespreads = config.getBoolean("GriefPrevention.Claims.FireSpreadsInClaims", false);
         this.config_claims_firedamages = config.getBoolean("GriefPrevention.Claims.FireDamagesInClaims", false);
         this.config_claims_lecternReadingRequiresAccessTrust = config.getBoolean("GriefPrevention.Claims.LecternReadingRequiresAccessTrust", true);
@@ -807,6 +810,7 @@ public class GriefPrevention extends JavaPlugin
         outConfig.set("GriefPrevention.Claims.ModificationTool", this.config_claims_modificationTool.name());
         outConfig.set("GriefPrevention.Claims.AllowTrappedInAdminClaims", this.config_claims_allowTrappedInAdminClaims);
         outConfig.set("GriefPrevention.Claims.MaximumNumberOfClaimsPerPlayer", this.config_claims_maxClaimsPerPlayer);
+        outConfig.set("GriefPrevention.Claims.MinimumDistanceFromWorldSpawnToAllowClaims", this.config_claims_minDistanceFromSpawnToAllowClaims);
         outConfig.set("GriefPrevention.Claims.VillagerTradingRequiresPermission", this.config_claims_villagerTradingRequiresTrust);
         outConfig.set("GriefPrevention.Claims.CommandsRequiringAccessTrust", accessTrustSlashCommands);
         outConfig.set("GriefPrevention.Claims.DeliverManuals", config_claims_supplyPlayerManual);

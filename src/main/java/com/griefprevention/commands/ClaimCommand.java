@@ -62,6 +62,13 @@ public class ClaimCommand extends CommandHandler
             return true;
         }
 
+        Location playerLocation = player.getLocation();
+        Location spawnLocation = world.getSpawnLocation();
+        if (playerLocation.distance(spawnLocation)  < GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims) {
+            GriefPrevention.sendMessage(player, TextMode.Err, Messages.TooCloseToSpawn, String.valueOf(GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims));
+            return true;
+        }
+
         int radius;
 
         //allow for specifying the radius

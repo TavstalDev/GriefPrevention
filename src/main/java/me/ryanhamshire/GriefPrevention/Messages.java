@@ -244,6 +244,7 @@ public enum Messages
     ClaimMissing("§cYou are not standing in a claim!"),
     HologramEnabled("§aClaim hologram §eenabled§a!"),
     HologramDisabled("§aClaim hologram §edisabled§a!"),
+    TooCloseToSpawn("§cYou can't claim land this close to spawn! You can claim land {0} blocks or more away from spawn.", "0: minimum distance from spawn"),
 
     HologramTitle("§8[§6CLAIM§8]"),
     HologramOwner("§fOwner: §e{0}"),
@@ -291,10 +292,7 @@ public enum Messages
     Day("{0} day(s)"),
     Hour("{0} hour(s)"),
     Minute("{0} minute(s)"),
-    Second("{0} second(s)"),
-
-
-    TemporalTranslation("This will be removed after I stop adding new messages, it is for prevent errors in the meantime.");
+    Second("{0} second(s)");
 
     final @NotNull String defaultValue;
     final @Nullable String notes;

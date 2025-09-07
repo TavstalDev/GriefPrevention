@@ -388,6 +388,14 @@ public class BlockEventHandler implements Listener
             //if the player doesn't have any claims yet, automatically create a claim centered at the chest
             if (playerData.getClaims().isEmpty() && player.getGameMode() == GameMode.SURVIVAL)
             {
+                // prevent placing too close to the world spawn
+                Location playerLocation = player.getLocation();
+                Location spawnLocation = player.getWorld().getSpawnLocation();
+                if (playerLocation.distance(spawnLocation)  < GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims) {
+                    GriefPrevention.sendMessage(player, TextMode.Err, Messages.TooCloseToSpawn, String.valueOf(GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims));
+                    return;
+                }
+
                 //radius == 0 means protect ONLY the chest
                 if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius == 0)
                 {
