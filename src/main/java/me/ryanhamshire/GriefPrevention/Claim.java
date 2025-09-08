@@ -906,6 +906,7 @@ public class Claim
 
         // Make the hologram see-through
         hologramData.setSeeThrough(true);
+        hologramData.setVisibilityDistance(15);
 
         Hologram hologram = manager.create(hologramData);
         manager.addHologram(hologram);
