@@ -167,6 +167,15 @@ public class GuiUtils {
      * @return true if the ItemStack is duped, false otherwise.
      */
     public static boolean isDuped(@NotNull ItemStack item) {
-        return hasNBT(item, DupeKey(), "true");
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null)
+            return false;
+
+        var dupeKey = DupeKey();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        if (!container.has(dupeKey, PersistentDataType.BOOLEAN))
+            return false;
+
+        return Boolean.TRUE.equals(container.get(dupeKey, PersistentDataType.BOOLEAN));
     }
 }
