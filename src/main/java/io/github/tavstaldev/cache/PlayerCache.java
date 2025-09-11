@@ -1,7 +1,7 @@
 package io.github.tavstaldev.cache;
 
 import com.samjakob.spigui.menu.SGMenu;
-import io.github.tavstaldev.gui.MainGUI;
+import io.github.tavstaldev.gui.ClaimGUI;
 import io.github.tavstaldev.gui.RefuelGUI;
 import me.ryanhamshire.GriefPrevention.Claim;
 import org.bukkit.entity.Player;
@@ -36,7 +36,7 @@ public class PlayerCache {
 
     public SGMenu getMainMenu() {
         if (_mainMenu == null) {
-            _mainMenu = MainGUI.create(_player);
+            _mainMenu = ClaimGUI.create(_player);
         }
         return _mainMenu;
     }

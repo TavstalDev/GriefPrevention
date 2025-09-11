@@ -21,11 +21,9 @@ package me.ryanhamshire.GriefPrevention;
 import com.google.common.io.Files;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
-import de.oliver.fancyholograms.api.FancyHologramsPlugin;
-import de.oliver.fancyholograms.api.HologramManager;
-import de.oliver.fancyholograms.api.data.TextHologramData;
-import de.oliver.fancyholograms.api.hologram.Hologram;
+import com.maximde.hologramlib.hologram.HologramManager;
 import io.github.tavstaldev.Constants;
+import io.github.tavstaldev.util.HoloUtil;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import me.ryanhamshire.GriefPrevention.events.ClaimDeletedEvent;
 import me.ryanhamshire.GriefPrevention.events.ClaimExtendEvent;
@@ -664,10 +662,10 @@ public abstract class DataStore
         }
 
         // remove any holograms associated with this claim
-        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+        HologramManager manager = GriefPrevention.instance.getHologramManager();
         var hologram = manager.getHologram("claim_" + claim.id);
         if (hologram.isPresent())
-            manager.removeHologram(hologram.get());
+            manager.remove(hologram.get().getId());
 
         //remove from memory
         for (int i = 0; i < this.claims.size(); i++)
@@ -1012,14 +1010,14 @@ public abstract class DataStore
         //otherwise add this new claim to the data store to make it effective
         this.addClaim(newClaim, true);
 
-        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+        HologramManager manager = GriefPrevention.instance.getHologramManager();
         if (manager.getHologram("claim_" + newClaim.id).isPresent())
         {
-           newClaim.refreshHologram();
+            HoloUtil.refreshHologram(newClaim);
         }
         else
         {
-            newClaim.createHologram();
+            HoloUtil.createHologram(newClaim);
         }
 
         //then return success along with reference to new claim

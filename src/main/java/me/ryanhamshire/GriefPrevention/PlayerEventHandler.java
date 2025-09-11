@@ -23,9 +23,9 @@ import com.griefprevention.util.command.MonitorableCommand;
 import com.griefprevention.util.command.MonitoredCommands;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
-import io.github.tavstaldev.gui.MainGUI;
 import io.github.tavstaldev.cache.PlayerCache;
 import io.github.tavstaldev.cache.PlayerCacheManager;
+import io.github.tavstaldev.gui.ClaimGUI;
 import me.ryanhamshire.GriefPrevention.events.ClaimInspectionEvent;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
 import org.bukkit.BanList;
@@ -1560,7 +1560,7 @@ class PlayerEventHandler implements Listener
                             clickedBlock.getWorld() == claimFromPlayerLocation.coreBlockLocation.getWorld()))
             {
                 event.setCancelled(true); //cancel the event so that the player can't open the claim's GUI
-                MainGUI.open(player, claimFromPlayerLocation);
+                ClaimGUI.open(player, claimFromPlayerLocation);
                 return;
             }
         }

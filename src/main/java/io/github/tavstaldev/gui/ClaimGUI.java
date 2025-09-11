@@ -26,7 +26,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MainGUI {
+public class ClaimGUI {
     private static final GriefPrevention _plugin = GriefPrevention.instance;
     private static final Logger _logger = _plugin.getLogger();
 

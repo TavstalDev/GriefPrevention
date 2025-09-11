@@ -148,8 +148,12 @@
                             <!-- Equivalent to relocate rules -->
                             <relocations>
                                 <relocation>
-                                    <pattern>com.samjakob.spigui</pattern>
-                                    <shadedPattern>com.griefprevention.shadow.spigui</shadedPattern>
+                                    <pattern>com.github.hamza-cskn.obliviate-invs</pattern>
+                                    <shadedPattern>com.griefprevention.shadow.obliviateInvs</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.github.HologramLib</pattern>
+                                    <shadedPattern>com.griefprevention.shadow.hologramLib</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.github.fierioziy.particlenativeapi</pattern>
@@ -222,10 +226,10 @@
         </dependency>
         <!-- Hologram Dependency -->
         <dependency>
-            <groupId>de.oliver</groupId>
-            <artifactId>FancyHolograms</artifactId>
-            <version>2.7.0</version>
-            <scope>provided</scope>
+            <groupId>com.github.HologramLib</groupId>
+            <artifactId>HologramLib</artifactId>
+            <version>1.7.6</version>
+            <scope>compile</scope>
         </dependency>
         <!-- Vault Dependency -->
         <dependency>

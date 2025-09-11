@@ -1,5 +1,6 @@
 package io.github.tavstaldev.tasks;
 
+import io.github.tavstaldev.util.HoloUtil;
 import me.ryanhamshire.GriefPrevention.Claim;
 
 public class UpdateClaimHologramTask implements Runnable
@@ -14,6 +15,6 @@ public class UpdateClaimHologramTask implements Runnable
     @Override
     public void run()
     {
-        claim.refreshHologram();
+        HoloUtil.refreshHologram(claim);
     }
 }

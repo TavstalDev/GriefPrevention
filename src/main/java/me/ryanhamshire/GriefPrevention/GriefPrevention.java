@@ -25,13 +25,17 @@ import com.google.common.cache.CacheBuilder;
 import com.griefprevention.commands.ClaimCommand;
 import com.griefprevention.metrics.MetricsHandler;
 import com.griefprevention.protection.ProtectionHelper;
+import com.maximde.hologramlib.HologramLib;
+import com.maximde.hologramlib.hologram.HologramManager;
 import com.samjakob.spigui.SpiGUI;
 import io.github.tavstaldev.commands.BuyClaimBlocksCommand;
 import io.github.tavstaldev.commands.ClaimsCommand;
 import io.github.tavstaldev.commands.PriceClaimBlocksCommand;
 import io.github.tavstaldev.commands.ToggleHologramCommand;
+import io.github.tavstaldev.events.InventoryEventListener;
 import io.github.tavstaldev.tasks.RefreshClaimHologramTask;
 import io.github.tavstaldev.util.EconomyUtils;
+import io.github.tavstaldev.util.HoloUtil;
 import io.github.tavstaldev.util.PermissionUtils;
 import me.ryanhamshire.GriefPrevention.DataStore.NoTransferException;
 import me.ryanhamshire.GriefPrevention.events.SaveTrappedPlayerEvent;
@@ -125,6 +129,11 @@ public class GriefPrevention extends JavaPlugin
     private SpiGUI spiGUI;
     public SpiGUI GetGUI() {
         return spiGUI;
+    }
+
+    private HologramManager hologramManager;
+    public HologramManager getHologramManager() {
+        return hologramManager;
     }
 
     private ParticleNativeAPI particleApi;
@@ -296,6 +305,11 @@ public class GriefPrevention extends JavaPlugin
         AddLogEntry(entry, CustomLogEntryTypes.Debug);
     }
 
+    @Override
+    public void onLoad() {
+        HologramLib.onLoad(this);
+    }
+
     //initializes well...   everything
     public void onEnable()
     {
@@ -334,15 +348,16 @@ public class GriefPrevention extends JavaPlugin
         else
             AddLogEntry("Economy plugin found and hooked into Vault.");
 
-        // check if FancyHolograms is installed
-        if (this.getServer().getPluginManager().getPlugin("FancyHolograms") == null)
-        {
-            AddLogEntry("FancyHolograms was not detected, please install it to use holograms.");
+        // check if HologramLib is installed
+        if (HologramLib.getManager().isPresent()) {
+            hologramManager = HologramLib.getManager().get();
+            AddLogEntry("HologramLib plugin found and hooked into it.");
+        }
+        else {
+            AddLogEntry("Failed to initialize HologramLib manager.");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        else
-            AddLogEntry("FancyHolograms plugin found and hooked into it.");
 
         //when datastore initializes, it loads player and claim data, and posts some stats to the log
         if (this.databaseUrl.length() > 0)
@@ -453,6 +468,11 @@ public class GriefPrevention extends JavaPlugin
         }
 
         setUpCommands();
+        // Load holograms for claims
+        for (var claim : dataStore.claims) {
+            HoloUtil.createHologram(claim);
+        }
+        InventoryEventListener.init();
 
         AddLogEntry("Boot finished.");
 

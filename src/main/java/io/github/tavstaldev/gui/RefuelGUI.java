@@ -6,6 +6,7 @@ import io.github.tavstaldev.Constants;
 import io.github.tavstaldev.util.GuiUtils;
 import io.github.tavstaldev.cache.PlayerCache;
 import io.github.tavstaldev.cache.PlayerCacheManager;
+import io.github.tavstaldev.util.HoloUtil;
 import io.github.tavstaldev.util.TimeUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
@@ -64,7 +65,7 @@ public class RefuelGUI
             ).withListener(event -> {
                 close(player);
                 PlayerCache playerData = PlayerCacheManager.getPlayerData(playerId);
-                MainGUI.open(player, playerData.getClaim());
+                ClaimGUI.open(player, playerData.getClaim());
             });
             menu.setButton(0, 45, closeButton);
 
@@ -243,7 +244,7 @@ public class RefuelGUI
 
                     // Update the claim in the data store
                     GriefPrevention.instance.dataStore.saveClaim(claim);
-                    claim.refreshHologram();
+                    HoloUtil.refreshHologram(claim);
                     GriefPrevention.sendMessage(player, TextMode.Success, Messages.GuiRefuelSuccess);
                 }));
             }

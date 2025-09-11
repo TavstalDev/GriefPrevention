@@ -18,11 +18,6 @@
 
 package me.ryanhamshire.GriefPrevention;
 
-import de.oliver.fancyholograms.api.FancyHologramsPlugin;
-import de.oliver.fancyholograms.api.HologramManager;
-import de.oliver.fancyholograms.api.data.HologramData;
-import de.oliver.fancyholograms.api.data.TextHologramData;
-import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.ryanhamshire.GriefPrevention.events.ClaimPermissionCheckEvent;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
 import org.bukkit.Bukkit;
@@ -876,81 +871,4 @@ public class Claim
     }
 
     public String getRemainingTime() {return getRemainingTime(true); }
-
-    public void createHologram() {
-        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-        var hologramOpt = manager.getHologram("claim_" + id);
-        if (hologramOpt.isPresent())
-            return;
-
-        var hologramLocation = coreBlockLocation.clone();
-        hologramLocation.setX(hologramLocation.getBlockX() + 0.5); // center the hologram
-        hologramLocation.setY(hologramLocation.getBlockY() + 2);
-        hologramLocation.setZ(hologramLocation.getBlockZ() + 0.5); // center the hologram
-        TextHologramData hologramData = new TextHologramData("claim_" + id, hologramLocation);
-
-
-        ArrayList<String> builders = new ArrayList<>();
-        ArrayList<String> containers = new ArrayList<>();
-        ArrayList<String> accessors = new ArrayList<>();
-        ArrayList<String> managers = new ArrayList<>();
-        getPermissions(builders, containers, accessors, managers);
-
-        // Adjust the Hologram Data
-        hologramData.removeLine(0);
-        hologramData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramTitle));
-        hologramData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramOwner, getOwnerName()));
-        hologramData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramMembers, String.valueOf(builders.size())));
-        hologramData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramBlocks, String.valueOf(getArea())));
-        hologramData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramExpiry, getRemainingTime()));
-
-        // Make the hologram see-through
-        hologramData.setSeeThrough(true);
-        hologramData.setVisibilityDistance(10);
-
-        Hologram hologram = manager.create(hologramData);
-        manager.addHologram(hologram);
-    }
-
-    public void refreshHologram() {
-        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-        var hologramOpt = manager.getHologram("claim_" + id);
-        if (hologramOpt.isEmpty())
-            return;
-
-        var hologram = hologramOpt.get();
-        HologramData hologramData = hologram.getData();
-
-        ArrayList<String> builders = new ArrayList<>();
-        ArrayList<String> containers = new ArrayList<>();
-        ArrayList<String> accessors = new ArrayList<>();
-        ArrayList<String> managers = new ArrayList<>();
-        getPermissions(builders, containers, accessors, managers);
-
-        if (hologramData instanceof TextHologramData textData) {
-            textData.setText(new ArrayList<>());
-            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramTitle));
-            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramOwner, getOwnerName()));
-            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramMembers, String.valueOf(builders.size())));
-            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramBlocks, String.valueOf(getArea())));
-            textData.addLine(GriefPrevention.instance.dataStore.getMessage(Messages.HologramExpiry, getRemainingTime(false)));
-        }
-
-        hologram.forceUpdate();
-        hologram.queueUpdate();
-    }
-
-    public boolean toggleHologram() {
-        HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
-        var hologramOpt = manager.getHologram("claim_" + id);
-        if (hologramOpt.isEmpty())
-        {
-            createHologram();
-            return true;
-        }
-
-        var hologram = hologramOpt.get();
-        manager.removeHologram(hologram);
-        return false;
-    }
 }

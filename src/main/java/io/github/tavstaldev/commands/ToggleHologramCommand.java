@@ -1,6 +1,7 @@
 package io.github.tavstaldev.commands;
 
 import com.griefprevention.commands.CommandHandler;
+import io.github.tavstaldev.util.HoloUtil;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
@@ -40,7 +41,7 @@ public class ToggleHologramCommand extends CommandHandler
             return true;
         }
 
-        if (claim.toggleHologram())
+        if (HoloUtil.toggleHologram(claim))
         {
             GriefPrevention.sendMessage(player, TextMode.Success, Messages.HologramEnabled);
         }
