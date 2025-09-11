@@ -191,18 +191,18 @@ public class RefuelGUI
                 translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelRightClick);
                 if (!translation.isEmpty())
                     loreList.add(translation);
-                translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelShiftClick);
+                /*translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelShiftClick);
                 if (!translation.isEmpty())
-                    loreList.add(translation);
+                    loreList.add(translation);*/
                 var iconResult = GuiUtils.createItem(fuelMaterial, fuelMaterial.name(), loreList);
                 menu.setButton(0, slot, new SGButton(iconResult).withListener((InventoryClickEvent event) -> {
                     int amountToConsume = 1;
                     if (event.isRightClick()) {
-                        amountToConsume = 4;
+                        amountToConsume = 8;
                     }
-                    else if (event.isShiftClick()) {
+                    /*else if (event.isShiftClick()) {
                         amountToConsume = 64;
-                    }
+                    }*/
                     final Duration fuelToAdd = fuelDuration.multipliedBy(amountToConsume);
 
                     var inventory = player.getInventory();
