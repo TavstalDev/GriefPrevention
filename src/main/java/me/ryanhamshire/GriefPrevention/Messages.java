@@ -281,6 +281,9 @@ public enum Messages
     GuiRefuelWarning("§6 Warning"),
     GuiRefuelWarningMessage("§7> The maximum fuel level is §c{0}§7. "),
     GuiRefuelDuration("§7Duration: §e{0}"),
+    GuiRefuelLeftClick("§c> §eLeft-click to refuel x1"),
+    GuiRefuelRightClick("§c> §eRight-click to refuel x4"),
+    GuiRefuelShiftClick("§c> §eShift-click to refuel x64"),
 
     GuiRefuelNoFuel("§cYou don't have any fuel in your inventory!"),
     GuiRefuelFull("§cYour claim is already fully fueled!"),

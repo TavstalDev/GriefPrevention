@@ -6,6 +6,7 @@ import io.github.tavstaldev.Constants;
 import io.github.tavstaldev.util.GuiUtils;
 import io.github.tavstaldev.cache.PlayerCache;
 import io.github.tavstaldev.cache.PlayerCacheManager;
+import io.github.tavstaldev.util.TimeUtil;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
@@ -243,12 +244,16 @@ public class MainGUI {
 
             // Materials List
             translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiFuelInformationMaterialsList);
+            int count = 0;
             for (var set : Constants.FUEL.entrySet())
             {
                 var material = set.getKey();
                 var duration = set.getValue();
-                String hourTranslation = GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(duration.toHours()));
-                loreList.add(MessageFormat.format(translation, material.name(), hourTranslation));
+                String timeTranslation = TimeUtil.formatDuration(duration.toSeconds());
+                loreList.add(MessageFormat.format(translation, material.name(), timeTranslation));
+                count++;
+                if (count >= 16)
+                    break;
             }
             // Action
             if (isCallerOwner)

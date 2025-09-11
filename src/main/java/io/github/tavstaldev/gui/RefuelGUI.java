@@ -6,6 +6,7 @@ import io.github.tavstaldev.Constants;
 import io.github.tavstaldev.util.GuiUtils;
 import io.github.tavstaldev.cache.PlayerCache;
 import io.github.tavstaldev.cache.PlayerCacheManager;
+import io.github.tavstaldev.util.TimeUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
 import me.ryanhamshire.GriefPrevention.TextMode;
@@ -180,11 +181,29 @@ public class RefuelGUI
                 final var fuelDuration = Constants.FUEL.get(fuelMaterial);
 
                 loreList.clear();
-                translation = GriefPrevention.instance.dataStore.getMessage(Messages.Hour, String.valueOf(fuelDuration.toHours()));
+                translation = TimeUtil.formatDuration(fuelDuration.toSeconds());
                 translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelDuration, translation);
                 loreList.add(translation);
+                loreList.add(" ");
+                translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelLeftClick);
+                loreList.add(translation);
+                translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelRightClick);
+                if (!translation.isEmpty())
+                    loreList.add(translation);
+                translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelShiftClick);
+                if (!translation.isEmpty())
+                    loreList.add(translation);
                 var iconResult = GuiUtils.createItem(fuelMaterial, fuelMaterial.name(), loreList);
                 menu.setButton(0, slot, new SGButton(iconResult).withListener((InventoryClickEvent event) -> {
+                    int amountToConsume = 1;
+                    if (event.isRightClick()) {
+                        amountToConsume = 4;
+                    }
+                    else if (event.isShiftClick()) {
+                        amountToConsume = 64;
+                    }
+                    final Duration fuelToAdd = fuelDuration.multipliedBy(amountToConsume);
+
                     var inventory = player.getInventory();
                     if (!inventory.contains(fuelMaterial))
                     {
@@ -193,7 +212,7 @@ public class RefuelGUI
                     }
 
                     var remainingFuel = Duration.between(LocalDateTime.now(), claim.expirationDate);
-                    var totalFuel = remainingFuel.plus(fuelDuration);
+                    var totalFuel = remainingFuel.plus(fuelToAdd);
 
                     // Check if the total fuel duration exceeds the maximum limit
                     if (totalFuel.toSeconds() > Duration.ofHours(GriefPrevention.instance.config_advanced_claim_maximum_fuel_duration).toSeconds()) {
@@ -207,7 +226,7 @@ public class RefuelGUI
                         }
 
                         // Prevent adding more fuel if the current expiration date is already close to the limit
-                        if (Duration.between(claim.expirationDate, limitedExpiration).toHours() < fuelDuration.toHours()) {
+                        if (Duration.between(claim.expirationDate, limitedExpiration).toHours() < fuelToAdd.toHours()) {
                             GriefPrevention.sendMessage(player, TextMode.Err, Messages.GuiRefuelNearLimit);
                             return;
                         }
@@ -216,11 +235,11 @@ public class RefuelGUI
                         claim.expirationDate = limitedExpiration;
 
                     } else {
-                        claim.expirationDate = claim.expirationDate.plus(fuelDuration);
+                        claim.expirationDate = claim.expirationDate.plus(fuelToAdd);
                     }
 
 
-                    inventory.removeItem(new ItemStack(fuelMaterial, 1));
+                    inventory.removeItem(new ItemStack(fuelMaterial, amountToConsume));
 
                     // Update the claim in the data store
                     GriefPrevention.instance.dataStore.saveClaim(claim);
