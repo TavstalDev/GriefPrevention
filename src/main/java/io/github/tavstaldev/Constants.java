@@ -105,7 +105,6 @@ public class Constants
         unsortedMap.put(Material.SMOOTH_QUARTZ, Duration.ofMinutes(8));
         unsortedMap.put(Material.SOUL_SAND, Duration.ofMinutes(8));
         unsortedMap.put(Material.SOUL_SOIL, Duration.ofMinutes(8));
-        unsortedMap.put(Material.NETHER_SPROUTS, Duration.ofMinutes(8));
         unsortedMap.put(Material.BLAZE_ROD, Duration.ofMinutes(8));
         unsortedMap.put(Material.WITHER_ROSE, Duration.ofMinutes(8));
         unsortedMap.put(Material.SHROOMLIGHT, Duration.ofMinutes(8));
