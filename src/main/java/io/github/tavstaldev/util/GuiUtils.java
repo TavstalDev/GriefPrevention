@@ -86,14 +86,16 @@ public class GuiUtils {
      * @param nbtValue    The value for the NBT data.
      * @return The created ItemStack.
      */
-    public static ItemStack createItem(@NotNull Material material, @NotNull String displayName, List<String> lore, int amount, @Nullable String nbtKey, @Nullable String nbtValue) {
+    public static ItemStack createItem(@NotNull Material material, @Nullable String displayName, @Nullable List<String> lore, int amount, @Nullable String nbtKey, @Nullable String nbtValue) {
         ItemStack item = new ItemStack(material, amount);
         ItemMeta meta = item.getItemMeta();
 
         // Set display name
-        meta.setDisplayName(displayName);
+        if (displayName != null)
+            meta.setDisplayName(displayName);
         // Set lore
-        meta.setLore(lore);
+        if (lore != null)
+            meta.setLore(lore);
 
         // Set NBT tag
         if (nbtKey != null && nbtValue != null) {

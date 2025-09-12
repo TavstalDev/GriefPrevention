@@ -194,7 +194,7 @@ public class RefuelGUI
                 /*translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiRefuelShiftClick);
                 if (!translation.isEmpty())
                     loreList.add(translation);*/
-                var iconResult = GuiUtils.createItem(fuelMaterial, fuelMaterial.name(), loreList);
+                var iconResult = GuiUtils.createItem(fuelMaterial, null, loreList, 1, null, null);
                 menu.setButton(0, slot, new SGButton(iconResult).withListener((InventoryClickEvent event) -> {
                     int amountToConsume = 1;
                     if (event.isRightClick()) {
@@ -234,11 +234,9 @@ public class RefuelGUI
 
                         // Set the new expiration date to the capped value
                         claim.expirationDate = limitedExpiration;
-
                     } else {
                         claim.expirationDate = claim.expirationDate.plus(fuelToAdd);
                     }
-
 
                     inventory.removeItem(new ItemStack(fuelMaterial, amountToConsume));
 
