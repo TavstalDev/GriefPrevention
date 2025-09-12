@@ -170,6 +170,7 @@ public class BlockEventHandler implements Listener
         {
             playerData.setAccruedClaimBlocks(playerData.getAccruedClaimBlocks() - (int) Math.ceil((claim.getArea() * (1 - GriefPrevention.instance.config_claims_abandonReturnRatio))));
         }
+        playerData.setVisibleBoundaries(null);
 
         //tell the player how many claim blocks he has left
         int remainingBlocks = playerData.getRemainingClaimBlocks();
