@@ -76,10 +76,8 @@ public class HoloUtil
             createHologram(claim);
             return true;
         }
-
-        var hologram = hologramOpt.get();
-        hologram.setIsInvisible(!hologram.isInvisible());
-        return !hologram.isInvisible();
+        manager.remove(hologramOpt.get().getId());
+        return false;
     }
 
     public static int toARGB(int alpha, int red, int green, int blue) {
