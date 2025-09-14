@@ -402,25 +402,22 @@ public class PlayerData
     private int getDefaultClaimBlocks() {
         try
         {
-
             OfflinePlayer offlinePlayer = GriefPrevention.instance.getServer().getOfflinePlayer(this.playerID);
             var primaryGroup = PermissionUtils.getPrimaryGroup(offlinePlayer);
-            if (primaryGroup == null)
-                return GriefPrevention.instance.config_claims_initialBlocks;
-
-            for (var group : GriefPrevention.instance.config_claims_initialBlocksByPermission)
+            for (var group : GriefPrevention.instance.config_claims_initialBlocksByPermission.keySet())
             {
-                if (group.containsKey(primaryGroup))
-                {
-                    int initialBlocks = group.get(primaryGroup);
-                    if (initialBlocks > 0)
-                    {
-                        cachedGroup = primaryGroup;
-                        return initialBlocks;
-                    }
+                if (primaryGroup != null && group.contains(primaryGroup)) {
+                    cachedGroup = primaryGroup;
+                    return GriefPrevention.instance.config_claims_initialBlocksByPermission.get(group);
                 }
-            }
 
+                if (PermissionUtils.checkOfflinePermission(offlinePlayer, "griefprevention.blocks." + group))
+                {
+                    cachedGroup = primaryGroup;
+                    return GriefPrevention.instance.config_claims_initialBlocksByPermission.get(group);
+                }
+
+            }
             return GriefPrevention.instance.config_claims_initialBlocks;
         }
         catch (Exception ex) {

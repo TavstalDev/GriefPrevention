@@ -164,7 +164,7 @@ public class GriefPrevention extends JavaPlugin
     public int config_claims_minDistanceFromSpawnToAllowClaims;                //minimum distance from world spawn point that claims will be allowed
 
     public int config_claims_initialBlocks;                            //the number of claim blocks a new player starts with
-    public List<Map<String, Integer>> config_claims_initialBlocksByPermission; //the number of claim blocks a new player starts with, by permission node
+    public Map<String, Integer> config_claims_initialBlocksByPermission; //the number of claim blocks a new player starts with, by permission node
     public double config_claims_pricePerBlock;                      //the price per claim block, in the economy currency
     public double config_claims_abandonReturnRatio;                 //the portion of claim blocks returned to a player when a claim is abandoned
     public int config_claims_blocksAccruedPerHour_default;            //how many additional blocks players get each hour of play (can be zero) without any special permissions
@@ -630,23 +630,37 @@ public class GriefPrevention extends JavaPlugin
         this.config_claims_raidTriggersRequireBuildTrust = config.getBoolean("GriefPrevention.Claims.RaidTriggersRequireBuildTrust", true);
         this.config_claims_initialBlocks = config.getInt("GriefPrevention.Claims.InitialBlocks", 100);
         //#region Initial Blocks By Permission
-        List<Map<?, ?>> rawList = config.getMapList("GriefPrevention.Claims.InitialBlocksByPermission");
-        List<Map<String, Integer>> typedList = new ArrayList<>();
-
-        for (Map<?, ?> rawMap : rawList) {
-            // Safe casting the map to the desired type
-            @SuppressWarnings("unchecked")
-            Map<String, Integer> castedMap = (Map<String, Integer>) rawMap;
-            typedList.add(castedMap);
+        var permSection = config.getConfigurationSection("GriefPrevention.Claims.InitialBlocksByPermission");
+        if (permSection != null)
+        {
+            var rawList = permSection.getValues(false);
+            Map<String, Integer> permMap = new HashMap<>();
+            for (String rank : rawList.keySet()) {
+                permMap.put(rank, (Integer) rawList.get(rank));
+            }
+            // Add default values if the list is empty
+            if (permMap.isEmpty())
+            {
+                permMap.put("vip", 200);
+                permMap.put("elit", 300);
+                permMap.put("zsirkiraly", 400);
+                permMap.put("titan", 500);
+                permMap.put("felisten", 600);
+                permMap.put("mindenhato", 700);
+            }
+            this.config_claims_initialBlocksByPermission = permMap;
+        }
+        else {
+            this.config_claims_initialBlocksByPermission = new HashMap<>();
+            this.config_claims_initialBlocksByPermission.put("vip", 200);
+            this.config_claims_initialBlocksByPermission.put("elit", 300);
+            this.config_claims_initialBlocksByPermission.put("zsirkiraly", 400);
+            this.config_claims_initialBlocksByPermission.put("titan", 500);
+            this.config_claims_initialBlocksByPermission.put("felisten", 600);
+            this.config_claims_initialBlocksByPermission.put("mindenhato", 700);
         }
 
-        // Add default values if the list is empty
-        if (typedList.isEmpty()) {
-            typedList.add(Map.of("vip", 200));
-            typedList.add(Map.of("mvp", 300));
-        }
 
-        this.config_claims_initialBlocksByPermission = typedList;
         //#endregion
         this.config_claims_pricePerBlock = config.getDouble("GriefPrevention.Claims.PricePerBlock", 100.0D);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.BlocksAccruedPerHour", 100);
