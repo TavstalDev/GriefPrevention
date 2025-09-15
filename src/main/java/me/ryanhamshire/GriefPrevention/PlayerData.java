@@ -404,21 +404,24 @@ public class PlayerData
         {
             OfflinePlayer offlinePlayer = GriefPrevention.instance.getServer().getOfflinePlayer(this.playerID);
             var primaryGroup = PermissionUtils.getPrimaryGroup(offlinePlayer);
-            for (var group : GriefPrevention.instance.config_claims_initialBlocksByPermission.keySet())
+            int initialBlocks = GriefPrevention.instance.config_claims_initialBlocks;
+            var blocks = GriefPrevention.instance.config_claims_initialBlocksByPermission;
+            for (var group : blocks.keySet())
             {
-                if (primaryGroup != null && group.contains(primaryGroup)) {
+                int currentBlocks = blocks.get(group);
+                if (primaryGroup != null && group.contains(primaryGroup) && currentBlocks > initialBlocks) {
                     cachedGroup = primaryGroup;
-                    return GriefPrevention.instance.config_claims_initialBlocksByPermission.get(group);
+                    initialBlocks = currentBlocks;
+                    continue;
                 }
 
-                if (PermissionUtils.checkOfflinePermission(offlinePlayer, "griefprevention.blocks." + group))
+                if (PermissionUtils.checkOfflinePermission(offlinePlayer, "griefprevention.blocks." + group) && currentBlocks > initialBlocks)
                 {
                     cachedGroup = primaryGroup;
-                    return GriefPrevention.instance.config_claims_initialBlocksByPermission.get(group);
+                    initialBlocks = currentBlocks;
                 }
-
             }
-            return GriefPrevention.instance.config_claims_initialBlocks;
+            return initialBlocks;
         }
         catch (Exception ex) {
             GriefPrevention.AddLogEntry("Error getting default claim blocks for player " + this.playerID + ": " + ex.getMessage(), CustomLogEntryTypes.Exception, true);

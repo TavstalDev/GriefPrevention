@@ -79,9 +79,11 @@ import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -97,6 +99,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GriefPrevention extends JavaPlugin
 {
@@ -648,21 +651,36 @@ public class GriefPrevention extends JavaPlugin
                 permMap.put("felisten", 600);
                 permMap.put("mindenhato", 700);
             }
-            this.config_claims_initialBlocksByPermission = permMap;
+            this.config_claims_initialBlocksByPermission = permMap.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue,
+                            LinkedHashMap::new
+                    ));
         }
         else {
-            this.config_claims_initialBlocksByPermission = new HashMap<>();
-            this.config_claims_initialBlocksByPermission.put("vip", 200);
-            this.config_claims_initialBlocksByPermission.put("elit", 300);
-            this.config_claims_initialBlocksByPermission.put("zsirkiraly", 400);
-            this.config_claims_initialBlocksByPermission.put("titan", 500);
-            this.config_claims_initialBlocksByPermission.put("felisten", 600);
-            this.config_claims_initialBlocksByPermission.put("mindenhato", 700);
+            Map<String, Integer> permMap = new HashMap<>();
+            permMap.put("vip", 200);
+            permMap.put("elit", 300);
+            permMap.put("zsirkiraly", 400);
+            permMap.put("titan", 500);
+            permMap.put("felisten", 600);
+            permMap.put("mindenhato", 700);
+            this.config_claims_initialBlocksByPermission =  permMap.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue,
+                            LinkedHashMap::new
+                    ));
         }
 
 
         //#endregion
-        this.config_claims_pricePerBlock = config.getDouble("GriefPrevention.Claims.PricePerBlock", 100.0D);
+        this.config_claims_pricePerBlock = config.getDouble("GriefPrevention.Claims.PricePerBlock", 1000.0D);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.BlocksAccruedPerHour", 100);
         this.config_claims_blocksAccruedPerHour_default = config.getInt("GriefPrevention.Claims.Claim Blocks Accrued Per Hour.Default", config_claims_blocksAccruedPerHour_default);
         this.config_claims_maxAccruedBlocks_default = config.getInt("GriefPrevention.Claims.MaxAccruedBlocks", 80000);
@@ -831,7 +849,7 @@ public class GriefPrevention extends JavaPlugin
         outConfig.set("GriefPrevention.Claims.InitialBlocks", this.config_claims_initialBlocks);
         outConfig.set("GriefPrevention.Claims.InitialBlocksByPermission", this.config_claims_initialBlocksByPermission);
         outConfig.set("GriefPrevention.Claims.Claim Blocks Accrued Per Hour.Default", this.config_claims_blocksAccruedPerHour_default);
-        outConfig.set("GriefPrevention.Claims.Price Per Block", this.config_claims_pricePerBlock);
+        outConfig.set("GriefPrevention.Claims.PricePerBlock", this.config_claims_pricePerBlock);
         outConfig.set("GriefPrevention.Claims.Max Accrued Claim Blocks.Default", this.config_claims_maxAccruedBlocks_default);
         outConfig.set("GriefPrevention.Claims.AbandonReturnRatio", this.config_claims_abandonReturnRatio);
         outConfig.set("GriefPrevention.Claims.AutomaticNewPlayerClaimsRadius", this.config_claims_automaticClaimsForNewPlayersRadius);
