@@ -234,6 +234,8 @@ public enum Messages
     CommandBuyClaimBlocks("§7/claims buyblocks <amount> §8- §7Buy claim blocks"),
     CommandPriceOfClaimBlocks("§7/claims price §8- §7Show the price of a claim block"),
     CommandToggleHologram("§7/claims hologram §8- §7Toggle the display of the claim information hologram"),
+    CommandToggleBorder("§7/claims border §8- §7Toggle the visualization of the claim boundary"),
+    CommandMoveCoreBlock("§7/claims movecore §8- §7Move the core block of your claim to your current location"),
 
     InvalidAmount("§cInvalid amount!"),
     NotEnoughMoney("§cYou don't have enough money!"),
@@ -245,6 +247,13 @@ public enum Messages
     HologramEnabled("§aClaim hologram §eenabled§a!"),
     HologramDisabled("§aClaim hologram §edisabled§a!"),
     TooCloseToSpawn("§cYou can't claim land this close to spawn! You can claim land {0} blocks or more away from spawn.", "0: minimum distance from spawn"),
+    NoPlayerData("§cNo player data found! Please try again later."),
+    BorderVisualizationOff("§aClaim boundary visualization §eoff§a!"),
+    BorderVisualizationOn("§aClaim boundary visualization §eon§a!"),
+    MoveCoreBlockSuccess("§aMoved the core block of your claim to your current location!"),
+    MoveCoreBlockFail("§cFailed to move the core block of your claim. Make sure you're standing inside your claim!"),
+    MoveCoreBlockFailNotAir("§cFailed to move the core block of your claim. Make sure you're standing in a block!"),
+    CoreBlockNotInClaim("§cThe block you're standing in is not inside the claim area!"),
 
     HologramTitle("§8[§6CLAIM§8]"),
     HologramOwner("§fOwner: §e{0}"),
@@ -255,6 +264,7 @@ public enum Messages
 
     GuiTitle("§8[§6CLAIM§8] §4{0}"),
     GuiClose("§cClose"),
+    GuiBack("§cBack"),
     GuiPreviousPage("§fPrevious Page"),
     GuiNextPage("§fNext Page"),
     GuiPage("§fPage §e{0}§f/§6{1}"),

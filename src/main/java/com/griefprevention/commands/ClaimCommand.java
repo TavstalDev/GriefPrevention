@@ -2,8 +2,6 @@ package com.griefprevention.commands;
 
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
-import io.github.tavstaldev.Constants;
-import jdk.jfr.Timespan;
 import me.ryanhamshire.GriefPrevention.AutoExtendClaimTask;
 import me.ryanhamshire.GriefPrevention.CreateClaimResult;
 import me.ryanhamshire.GriefPrevention.DataStore;
@@ -196,8 +194,8 @@ public class ClaimCommand extends CommandHandler
         }
 
         boolean isPlacedByPlayer = true;
-        if (!targetBlockType.equals(Constants.CORE_BLOCK_MATERIAL)) {
-            block.setType(Constants.CORE_BLOCK_MATERIAL);
+        if (!targetBlockType.equals(GriefPrevention.instance.config_advanced_core_block_material)) {
+            block.setType(GriefPrevention.instance.config_advanced_core_block_material);
             isPlacedByPlayer = false;
         }
 
@@ -223,6 +221,9 @@ public class ClaimCommand extends CommandHandler
                 GriefPrevention.sendMessage(player, TextMode.Err, Messages.CreateClaimFailOverlapShort);
 
                 BoundaryVisualization.visualizeClaim(player, result.claim, VisualizationType.CONFLICT_ZONE);
+            }
+            else if (result.coreBlockIssue) {
+                GriefPrevention.sendMessage(player, TextMode.Err, Messages.CoreBlockNotInClaim);
             }
             else
             {

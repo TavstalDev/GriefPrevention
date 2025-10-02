@@ -1,22 +1,22 @@
 package io.github.tavstaldev.commands;
 
 import com.griefprevention.commands.CommandHandler;
-import io.github.tavstaldev.util.HoloUtil;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.ClaimPermission;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.Messages;
 import me.ryanhamshire.GriefPrevention.TextMode;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class ToggleHologramCommand extends CommandHandler
+public class MoveCoreBlockCommand extends CommandHandler
 {
-    public ToggleHologramCommand(@NotNull GriefPrevention plugin)
+    public MoveCoreBlockCommand(@NotNull GriefPrevention plugin)
     {
-        super(plugin, "togglehologram");
+        super(plugin, "movecoreblock");
     }
 
     @Override
@@ -42,13 +42,24 @@ public class ToggleHologramCommand extends CommandHandler
             return true;
         }
 
-        if (HoloUtil.toggleHologram(claim))
+        var targetBlockType = player.getLocation().getBlock().getType();
+        if (!(targetBlockType.isAir()
+                || targetBlockType.equals(Material.SHORT_GRASS)
+                || targetBlockType.equals(Material.TALL_GRASS)
+                || targetBlockType.equals(Material.FERN)
+                || targetBlockType.equals(Material.LARGE_FERN)
+                || targetBlockType.equals(Material.DEAD_BUSH))){
+            GriefPrevention.sendMessage(player, TextMode.Err, Messages.MoveCoreBlockFailNotAir);
+            return true;
+        }
+
+        if (GriefPrevention.instance.dataStore.moveCoreBlock(claim, player.getLocation()))
         {
-            GriefPrevention.sendMessage(player, TextMode.Success, Messages.HologramEnabled);
+            GriefPrevention.sendMessage(player, TextMode.Success, Messages.MoveCoreBlockSuccess);
         }
         else
         {
-            GriefPrevention.sendMessage(player, TextMode.Success, Messages.HologramDisabled);
+            GriefPrevention.sendMessage(player, TextMode.Err, Messages.MoveCoreBlockFail);
         }
         return  true;
     }
