@@ -21,7 +21,6 @@ package me.ryanhamshire.GriefPrevention;
 import com.griefprevention.protection.ProtectionHelper;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
-import io.github.tavstaldev.Constants;
 import me.ryanhamshire.GriefPrevention.util.BoundingBox;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -375,7 +374,7 @@ public class BlockEventHandler implements Listener
         //FEATURE: automatically create a claim when a player who has no claims places a chest
 
         //otherwise if there's no claim, the player is placing a chest, and new player automatic claims are enabled
-        else if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius > -1 && player.hasPermission("griefprevention.createclaims") && block.getType() == Constants.CORE_BLOCK_MATERIAL)
+        else if (GriefPrevention.instance.config_claims_automaticClaimsForNewPlayersRadius > -1 && player.hasPermission("griefprevention.createclaims") && block.getType() == GriefPrevention.instance.config_advanced_core_block_material)
         {
             //if the chest is too deep underground, don't create the claim and explain why
             if (GriefPrevention.instance.config_claims_preventTheft && block.getY() < GriefPrevention.instance.config_claims_maxDepth)
@@ -451,6 +450,11 @@ public class BlockEventHandler implements Listener
 
                             //show the player the protected area
                             BoundaryVisualization.visualizeClaim(player, result.claim, VisualizationType.CLAIM, block);
+                        }
+                        else if (result.coreBlockIssue)
+                        {
+                            //this should only happen if the core block is invalid
+                            GriefPrevention.sendMessage(player, TextMode.Err, Messages.CoreBlockNotInClaim);
                         }
                         else
                         {
