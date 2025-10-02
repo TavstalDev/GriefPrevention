@@ -95,6 +95,8 @@ import org.bukkit.util.BlockIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -1945,6 +1947,14 @@ class PlayerEventHandler implements Listener
             {
                 if (clickedBlock.getLocation().equals(playerData.lastShovelLocation)) return;
 
+                // prevent placing too close to the world spawn
+                Location playerLocation = clickedBlock.getLocation();
+                Location spawnLocation = player.getWorld().getSpawnLocation();
+                if (playerLocation.distance(spawnLocation)  < GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims) {
+                    GriefPrevention.sendMessage(player, TextMode.Err, Messages.TooCloseToSpawn, String.valueOf(GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims));
+                    return;
+                }
+
                 //figure out what the coords of his new claim would be
                 int newx1, newx2, newz1, newz2, newy1, newy2;
                 if (playerData.lastShovelLocation.getBlockX() == playerData.claimResizing.getLesserBoundaryCorner().getBlockX())
@@ -2028,12 +2038,14 @@ class PlayerEventHandler implements Listener
                             }
 
                             //try to create a new claim (will return null if this subdivision overlaps another)
-                            /* TODO: Add a way to determine where should the core block be set with the tool
                             CreateClaimResult result = this.dataStore.createClaim(
                                     player.getWorld(),
                                     playerData.lastShovelLocation.getBlockX(), clickedBlock.getX(),
                                     playerData.lastShovelLocation.getBlockY() - instance.config_claims_claimsExtendIntoGroundDistance, clickedBlock.getY() - instance.config_claims_claimsExtendIntoGroundDistance,
                                     playerData.lastShovelLocation.getBlockZ(), clickedBlock.getZ(),
+                                    playerData.claimSubdividing.coreBlockLocation,
+                                    false,
+                                    LocalDateTime.now().plusYears(100), //subdivisions never expire
                                     null,  //owner is not used for subdivisions
                                     playerData.claimSubdividing,
                                     null, player);
@@ -2061,7 +2073,7 @@ class PlayerEventHandler implements Listener
                                 BoundaryVisualization.visualizeClaim(player, result.claim, VisualizationType.CLAIM, clickedBlock);
                                 playerData.lastShovelLocation = null;
                                 playerData.claimSubdividing = null;
-                            }*/
+                            }
                         }
                     }
 
@@ -2106,6 +2118,14 @@ class PlayerEventHandler implements Listener
                     return;
                 }
 
+                // prevent placing too close to the world spawn
+                Location playerLocation = clickedBlock.getLocation();
+                Location spawnLocation = player.getWorld().getSpawnLocation();
+                if (playerLocation.distance(spawnLocation)  < GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims) {
+                    GriefPrevention.sendMessage(player, TextMode.Err, Messages.TooCloseToSpawn, String.valueOf(GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims));
+                    return;
+                }
+
                 //remember it, and start him on the new claim
                 playerData.lastShovelLocation = clickedBlock.getLocation();
                 GriefPrevention.sendMessage(player, TextMode.Instr, Messages.ClaimStart);
@@ -2122,6 +2142,14 @@ class PlayerEventHandler implements Listener
                 {
                     playerData.lastShovelLocation = null;
                     this.onPlayerInteract(event);
+                    return;
+                }
+
+                // prevent placing too close to the world spawn
+                Location playerLocation = playerData.lastShovelLocation;
+                Location spawnLocation = player.getWorld().getSpawnLocation();
+                if (playerLocation.distance(spawnLocation)  < GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims) {
+                    GriefPrevention.sendMessage(player, TextMode.Err, Messages.TooCloseToSpawn, String.valueOf(GriefPrevention.instance.config_claims_minDistanceFromSpawnToAllowClaims));
                     return;
                 }
 
@@ -2180,12 +2208,15 @@ class PlayerEventHandler implements Listener
                 }
 
                 //try to create a new claim
-                /* TODO: Add a way to determine where should the core block be set with the tool
+                var expires = LocalDateTime.now().plus(Duration.ofHours(GriefPrevention.instance.config_advanced_claim_default_fuel_duration));
                 CreateClaimResult result = this.dataStore.createClaim(
                         player.getWorld(),
                         lastShovelLocation.getBlockX(), clickedBlock.getX(),
                         lastShovelLocation.getBlockY() - instance.config_claims_claimsExtendIntoGroundDistance, clickedBlock.getY() - instance.config_claims_claimsExtendIntoGroundDistance,
                         lastShovelLocation.getBlockZ(), clickedBlock.getZ(),
+                        player.getLocation(),
+                        false,
+                        expires,
                         playerID,
                         null, null,
                         player);
@@ -2198,6 +2229,9 @@ class PlayerEventHandler implements Listener
                         GriefPrevention.sendMessage(player, TextMode.Err, Messages.CreateClaimFailOverlapShort);
                         BoundaryVisualization.visualizeClaim(player, result.claim, VisualizationType.CONFLICT_ZONE, clickedBlock);
                     }
+                    else if (result.coreBlockIssue) {
+                        GriefPrevention.sendMessage(player, TextMode.Err, Messages.CoreBlockNotInClaim);
+                    }
                     else
                     {
                         GriefPrevention.sendMessage(player, TextMode.Err, Messages.CreateClaimFailOverlapRegion);
@@ -2209,6 +2243,11 @@ class PlayerEventHandler implements Listener
                 //otherwise, advise him on the /trust command and show him his new claim
                 else
                 {
+                    var coreBlock = result.claim.coreBlockLocation.getBlock();
+                    var targetBlockType = coreBlock.getType();
+                    if (!targetBlockType.equals(GriefPrevention.instance.config_advanced_core_block_material)) {
+                        coreBlock.setType(GriefPrevention.instance.config_advanced_core_block_material);
+                    }
                     GriefPrevention.sendMessage(player, TextMode.Success, Messages.CreateClaimSuccess);
                     BoundaryVisualization.visualizeClaim(player, result.claim, VisualizationType.CLAIM, clickedBlock);
                     playerData.lastShovelLocation = null;
@@ -2221,7 +2260,7 @@ class PlayerEventHandler implements Listener
                     }
 
                     AutoExtendClaimTask.scheduleAsync(result.claim);
-                }*/
+                }
             }
         }
     }
