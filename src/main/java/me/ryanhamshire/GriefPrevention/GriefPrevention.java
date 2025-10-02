@@ -30,13 +30,16 @@ import com.maximde.hologramlib.hologram.HologramManager;
 import com.samjakob.spigui.SpiGUI;
 import io.github.tavstaldev.commands.BuyClaimBlocksCommand;
 import io.github.tavstaldev.commands.ClaimsCommand;
+import io.github.tavstaldev.commands.MoveCoreBlockCommand;
 import io.github.tavstaldev.commands.PriceClaimBlocksCommand;
+import io.github.tavstaldev.commands.ToggleBorderCommand;
 import io.github.tavstaldev.commands.ToggleHologramCommand;
 import io.github.tavstaldev.events.InventoryEventListener;
 import io.github.tavstaldev.tasks.RefreshClaimHologramTask;
 import io.github.tavstaldev.util.EconomyUtils;
 import io.github.tavstaldev.util.HoloUtil;
 import io.github.tavstaldev.util.PermissionUtils;
+import io.github.tavstaldev.util.TimeUtil;
 import me.ryanhamshire.GriefPrevention.DataStore.NoTransferException;
 import me.ryanhamshire.GriefPrevention.events.SaveTrappedPlayerEvent;
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent;
@@ -77,6 +80,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -276,6 +280,10 @@ public class GriefPrevention extends JavaPlugin
     //ban management plugin interop settings
     public boolean config_ban_useCommand;
     public String config_ban_commandFormat;
+
+    // fuel config
+    public HashMap<Material, Duration> config_advanced_fuel_durations;
+    public Material config_advanced_core_block_material;
 
     private String databaseUrl;
     private String databaseUserName;
@@ -817,6 +825,52 @@ public class GriefPrevention extends JavaPlugin
         this.config_advanced_claim_maximum_fuel_duration = config.getInt("GriefPrevention.Advanced.MaximumClaimFuelDuration", 168);
         this.config_advanced_offlineplayer_cache_days = config.getInt("GriefPrevention.Advanced.OfflinePlayer_cache_days", 90);
 
+        // load fuels
+        HashMap<Material, Duration> fuelMap = new LinkedHashMap<>();
+        var fuelSection = config.getConfigurationSection("GriefPrevention.Advanced.ClaimFuels");
+        if (fuelSection != null) {
+            for (var key : fuelSection.getKeys(false)) {
+                Material mat = Material.getMaterial(key);
+                if (mat == null) {
+                    GriefPrevention.AddLogEntry("ERROR: Material " + key + " not found. This entry will be ignored. Please update your config.yml.");
+                    continue;
+                }
+                var value = fuelSection.getString(key);
+                if (value == null || value.isBlank()) {
+                    GriefPrevention.AddLogEntry("ERROR: No duration specified for " + key + ". This entry will be ignored. Please update your config.yml.");
+                    continue;
+                }
+                Duration duration = TimeUtil.parseDuration(value);
+                if (duration.isZero() || duration.isNegative()) {
+                    GriefPrevention.AddLogEntry("ERROR: Invalid duration specified for " + key + ". This entry will be ignored. Please update your config.yml.");
+                    continue;
+                }
+
+                fuelMap.put(mat, duration);
+            }
+        }
+        else {
+            // Add default values if the list is empty
+            fuelMap.put(Material.COAL, Duration.ofHours(4));
+            fuelMap.put(Material.CHARCOAL, Duration.ofHours(4));
+            fuelMap.put(Material.BLAZE_POWDER, Duration.ofHours(8));
+            fuelMap.put(Material.BLAZE_ROD, Duration.ofHours(24));
+            fuelMap.put(Material.LAVA_BUCKET, Duration.ofHours(48));
+            fuelMap.put(Material.MAGMA_BLOCK, Duration.ofHours(2));
+            fuelMap.put(Material.DRAGON_BREATH, Duration.ofHours(1));
+        }
+        this.config_advanced_fuel_durations = fuelMap.entrySet().stream()
+                .sorted(Map.Entry.<Material, Duration>comparingByValue().reversed()) // Sort by duration descending
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new
+                ));
+
+        var materialString = config.getString("GriefPrevention.Advanced.CoreBlockMaterial", Material.BARREL.name());
+        this.config_advanced_core_block_material = Material.getMaterial(materialString);
+
         //custom logger settings
         this.config_logs_daysToKeep = config.getInt("GriefPrevention.Abridged Logs.Days To Keep", 7);
         this.config_logs_socialEnabled = config.getBoolean("GriefPrevention.Abridged Logs.Included Entry Types.Social Activity", true);
@@ -944,6 +998,13 @@ public class GriefPrevention extends JavaPlugin
         outConfig.set("GriefPrevention.Advanced.DefaultClaimFuelDuration", this.config_advanced_claim_default_fuel_duration);
         outConfig.set("GriefPrevention.Advanced.MaximumClaimFuelDuration", this.config_advanced_claim_maximum_fuel_duration);
         outConfig.set("GriefPrevention.Advanced.OfflinePlayer_cache_days", this.config_advanced_offlineplayer_cache_days);
+        // Save fuels
+        outConfig.set("GriefPrevention.Advanced.CoreBlockMaterial", this.config_advanced_core_block_material.name());
+        HashMap<String, String> fuelDurations = new LinkedHashMap<>();
+        for (var entry : this.config_advanced_fuel_durations.entrySet()) {
+            fuelDurations.put(entry.getKey().name(), TimeUtil.durationToHumanReadable(entry.getValue()));
+        }
+        outConfig.set("GriefPrevention.Advanced.ClaimFuels", fuelDurations);
 
         //custom logger settings
         outConfig.set("GriefPrevention.Abridged Logs.Days To Keep", this.config_logs_daysToKeep);
@@ -1083,6 +1144,8 @@ public class GriefPrevention extends JavaPlugin
         new BuyClaimBlocksCommand(this);
         new PriceClaimBlocksCommand(this);
         new ToggleHologramCommand(this);
+        new ToggleBorderCommand(this);
+        new MoveCoreBlockCommand(this);
     }
 
     //handles slash commands
