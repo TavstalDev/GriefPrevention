@@ -1,6 +1,6 @@
 name: GriefPrevention
 main: me.ryanhamshire.GriefPrevention.GriefPrevention
-softdepend: [Multiverse-Core, My_Worlds, MystCraft, Transporter, RoyalCommands, MultiWorld, Denizen, CommandHelper, Vault, FancyHolograms]
+softdepend: [Multiverse-Core, My_Worlds, MystCraft, Transporter, RoyalCommands, MultiWorld, Denizen, CommandHelper, Vault]
 dev-url: https://dev.bukkit.org/projects/grief-prevention
 version: '${git.commit.id.describe}'
 api-version: '1.20'
@@ -196,6 +196,14 @@ commands:
       permission: griefprevention.claims
     togglehologram:
       description: Toggles the claim hologram on or off.
+      usage: /<command>
+      permission: griefprevention.claims
+    toggleborder:
+      description: Toggles the claim border visualization on or off.
+      usage: /<command>
+      permission: griefprevention.claims
+    movecoreblock:
+      description: Moves the core block of the claim you're standing in to your current location.
       usage: /<command>
       permission: griefprevention.claims
 permissions:
