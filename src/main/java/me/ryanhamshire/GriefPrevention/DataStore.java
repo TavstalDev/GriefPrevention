@@ -22,7 +22,6 @@ import com.google.common.io.Files;
 import com.griefprevention.visualization.BoundaryVisualization;
 import com.griefprevention.visualization.VisualizationType;
 import com.maximde.hologramlib.hologram.HologramManager;
-import io.github.tavstaldev.Constants;
 import io.github.tavstaldev.util.HoloUtil;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import me.ryanhamshire.GriefPrevention.events.ClaimDeletedEvent;
@@ -657,7 +656,7 @@ public abstract class DataStore
 
         // remove core block to prevent duping
         var block = claim.coreBlockLocation.getBlock();
-        if (!claim.isPlacedByPlayer && block.getType().equals(Constants.CORE_BLOCK_MATERIAL)) {
+        if (claim.parent == null && !claim.isPlacedByPlayer && block.getType().equals(GriefPrevention.instance.config_advanced_core_block_material)) {
             block.setType(Material.AIR);
         }
 
@@ -958,9 +957,10 @@ public abstract class DataStore
                 new ArrayList<>(),
                 id);
 
-        if (!newClaim.contains(coreBlock, true, false))
+        if (parent == null && !newClaim.contains(coreBlock, true, false))
         {
             //if the core block is not inside the claim, return failure
+            result.coreBlockIssue = true;
             result.succeeded = false;
             return result;
         }
@@ -994,6 +994,7 @@ public abstract class DataStore
         {
             // since this is a dry run, just return the unsaved claim as is.
             result.succeeded = true;
+            result.coreBlockIssue = false;
             result.claim = newClaim;
             return result;
         }
@@ -1010,18 +1011,22 @@ public abstract class DataStore
         //otherwise add this new claim to the data store to make it effective
         this.addClaim(newClaim, true);
 
-        HologramManager manager = GriefPrevention.instance.getHologramManager();
-        if (manager.getHologram("claim_" + newClaim.id).isPresent())
+        if (parent == null)
         {
-            HoloUtil.refreshHologram(newClaim);
-        }
-        else
-        {
-            HoloUtil.createHologram(newClaim);
+            HologramManager manager = GriefPrevention.instance.getHologramManager();
+            if (manager.getHologram("claim_" + newClaim.id).isPresent())
+            {
+                HoloUtil.refreshHologram(newClaim);
+            }
+            else
+            {
+                HoloUtil.createHologram(newClaim);
+            }
         }
 
         //then return success along with reference to new claim
         result.succeeded = true;
+        result.coreBlockIssue = false;
         result.claim = newClaim;
         return result;
     }
@@ -1362,6 +1367,28 @@ public abstract class DataStore
         {
             GriefPrevention.sendMessage(player, TextMode.Info, Messages.AdvertiseACB);
         }
+    }
+
+    public boolean moveCoreBlock(@NotNull Claim claim, @NotNull Location newCoreBlock)
+    {
+        if (!claim.contains(newCoreBlock, false, false))
+            return false;
+        final Location currentLocation = claim.coreBlockLocation;
+        final boolean hasHologram = HoloUtil.hasHologram(claim);
+        if (hasHologram) {
+            HoloUtil.removeHologram(claim);
+        }
+
+        currentLocation.getBlock().setType(Material.AIR);
+        claim.coreBlockLocation = newCoreBlock;
+        claim.coreBlockLocation.getBlock().setType(GriefPrevention.instance.config_advanced_core_block_material);
+        if (!claim.children.isEmpty())
+            claim.children.forEach(child -> child.coreBlockLocation = newCoreBlock); // Update subdivisions too
+        this.saveClaim(claim);
+        if (hasHologram) {
+            HoloUtil.createHologram(claim);
+        }
+        return true;
     }
 
     protected void loadMessages()
