@@ -186,40 +186,54 @@ public class PlayerData
     //don't load data from secondary storage until it's needed
     public synchronized int getAccruedClaimBlocks()
     {
-        if (this.accruedClaimBlocks == null) this.loadDataFromSecondaryStorage();
-
-        // update claim blocks if group changed
-        if (PermissionUtils.hasGroupSupport())
+        try
         {
-            String primaryGroup = PermissionUtils.getPrimaryGroup(Bukkit.getOfflinePlayer(this.playerID));
-            if (!Objects.equals(primaryGroup, cachedGroup))
+            if (this.accruedClaimBlocks == null) this.loadDataFromSecondaryStorage();
+
+            // update claim blocks if group changed
+            if (PermissionUtils.hasGroupSupport())
             {
-                int defaultClaimBlocks = this.getDefaultClaimBlocks();
-                if (this.accruedClaimBlocks < defaultClaimBlocks)
-                    this.accruedClaimBlocks = defaultClaimBlocks;
+                var offlinePlayer = Bukkit.getServer().getOfflinePlayer(this.playerID);
+                if (offlinePlayer == null)
+                    return this.accruedClaimBlocks;
+
+                String primaryGroup = PermissionUtils.getPrimaryGroup(offlinePlayer);
+                if (primaryGroup == null)
+                    return this.accruedClaimBlocks;
+
+                if (!Objects.equals(primaryGroup, cachedGroup))
+                {
+                    int defaultClaimBlocks = this.getDefaultClaimBlocks();
+                    if (this.accruedClaimBlocks < defaultClaimBlocks)
+                        this.accruedClaimBlocks = defaultClaimBlocks;
+                }
             }
+
+            //update claim blocks with any he has accrued during his current play session
+            if (this.newlyAccruedClaimBlocks > 0)
+            {
+                int accruedLimit = this.getAccruedClaimBlocksLimit();
+
+                //if over the limit before adding blocks, leave it as-is, because the limit may have changed AFTER he accrued the blocks
+                if (this.accruedClaimBlocks < accruedLimit)
+                {
+                    //move any in the holding area
+                    int newTotal = this.accruedClaimBlocks + this.newlyAccruedClaimBlocks;
+
+                    //respect limits
+                    this.accruedClaimBlocks = Math.min(newTotal, accruedLimit);
+                }
+
+                this.newlyAccruedClaimBlocks = 0;
+                return this.accruedClaimBlocks;
+            }
+
+            return accruedClaimBlocks;
         }
-
-        //update claim blocks with any he has accrued during his current play session
-        if (this.newlyAccruedClaimBlocks > 0)
-        {
-            int accruedLimit = this.getAccruedClaimBlocksLimit();
-
-            //if over the limit before adding blocks, leave it as-is, because the limit may have changed AFTER he accrued the blocks
-            if (this.accruedClaimBlocks < accruedLimit)
-            {
-                //move any in the holding area
-                int newTotal = this.accruedClaimBlocks + this.newlyAccruedClaimBlocks;
-
-                //respect limits
-                this.accruedClaimBlocks = Math.min(newTotal, accruedLimit);
-            }
-
-            this.newlyAccruedClaimBlocks = 0;
+        catch (Exception ex) {
+            GriefPrevention.AddLogEntry("Error getting accrued claim blocks for player " + this.playerID + ": " + ex.getMessage(), CustomLogEntryTypes.Exception, true);
             return this.accruedClaimBlocks;
         }
-
-        return accruedClaimBlocks;
     }
 
     public void setAccruedClaimBlocks(Integer accruedClaimBlocks)
