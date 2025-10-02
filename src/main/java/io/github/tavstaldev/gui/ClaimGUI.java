@@ -2,7 +2,6 @@ package io.github.tavstaldev.gui;
 
 import com.samjakob.spigui.buttons.SGButton;
 import com.samjakob.spigui.menu.SGMenu;
-import io.github.tavstaldev.Constants;
 import io.github.tavstaldev.util.GuiUtils;
 import io.github.tavstaldev.cache.PlayerCache;
 import io.github.tavstaldev.cache.PlayerCacheManager;
@@ -245,7 +244,7 @@ public class ClaimGUI {
             // Materials List
             translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiFuelInformationMaterialsList);
             int count = 0;
-            for (var set : Constants.FUEL.entrySet())
+            for (var set : GriefPrevention.instance.config_advanced_fuel_durations.entrySet())
             {
                 var material = set.getKey();
                 var duration = set.getValue();

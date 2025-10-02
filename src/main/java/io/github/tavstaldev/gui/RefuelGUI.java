@@ -2,7 +2,6 @@ package io.github.tavstaldev.gui;
 
 import com.samjakob.spigui.buttons.SGButton;
 import com.samjakob.spigui.menu.SGMenu;
-import io.github.tavstaldev.Constants;
 import io.github.tavstaldev.util.GuiUtils;
 import io.github.tavstaldev.cache.PlayerCache;
 import io.github.tavstaldev.cache.PlayerCacheManager;
@@ -58,8 +57,8 @@ public class RefuelGUI
 
             // Dynamic buttons should be handled only in the refresh method
 
-            // Close Button
-            translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiClose);
+            // Back Button
+            translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiBack);
             SGButton closeButton = new SGButton(
                     GuiUtils.createItem(Material.SPRUCE_DOOR, translation)
             ).withListener(event -> {
@@ -101,7 +100,7 @@ public class RefuelGUI
                 if (playerData.getClaim() == null)
                     return;
 
-                int maxPage = 1 + Constants.FUEL.size() / FuelsPerPage;
+                int maxPage = 1 + GriefPrevention.instance.config_advanced_fuel_durations.size() / FuelsPerPage;
                 if (playerData.getRefuelPage() < maxPage) {
                     playerData.setRefuelPage(playerData.getRefuelPage() + 1);
                     refresh(player);
@@ -159,7 +158,7 @@ public class RefuelGUI
             menu.setButton(0, 4, timeInfoButton);
 
             // Page Indicator
-            int maxPage = 1 + Constants.FUEL.size() / FuelsPerPage;
+            int maxPage = 1 + GriefPrevention.instance.config_advanced_fuel_durations.size() / FuelsPerPage;
             translation = GriefPrevention.instance.dataStore.getMessage(Messages.GuiPage, String.valueOf(playerData.getRefuelPage()), String.valueOf(maxPage));
             SGButton pageButton = new SGButton(
                     GuiUtils.createItem(Material.PAPER, translation
@@ -169,7 +168,7 @@ public class RefuelGUI
 
             // Fuel List
             int page = playerData.getRefuelPage();
-            var fuelList = Constants.FUEL.keySet().stream().toList();
+            var fuelList = GriefPrevention.instance.config_advanced_fuel_durations.keySet().stream().toList();
             for (int i = 0; i < FuelsPerPage; i++) {
                 int index = i + (page - 1) * FuelsPerPage;
                 int slot = i + 10 + (2 * (i / 7));
@@ -179,7 +178,7 @@ public class RefuelGUI
                 }
 
                 final var fuelMaterial = fuelList.get(index);
-                final var fuelDuration = Constants.FUEL.get(fuelMaterial);
+                final var fuelDuration = GriefPrevention.instance.config_advanced_fuel_durations.get(fuelMaterial);
 
                 loreList.clear();
                 translation = TimeUtil.formatDuration(fuelDuration.toSeconds());
