@@ -45,6 +45,15 @@ public class HoloUtil
         return manager.spawn(hologramData, hologramLocation);
     }
 
+    public static void removeHologram(Claim claim) {
+        HologramManager manager = GriefPrevention.instance.getHologramManager();
+        var hologramOpt = manager.getHologram("claim_" + claim.getID());
+        if (hologramOpt.isEmpty())
+            return;
+
+        manager.remove(hologramOpt.get().getId());
+    }
+
     public static void refreshHologram(Claim claim) {
         HologramManager manager = GriefPrevention.instance.getHologramManager();
         var hologramOpt = manager.getHologram("claim_" + claim.getID());
@@ -82,5 +91,11 @@ public class HoloUtil
 
     public static int toARGB(int alpha, int red, int green, int blue) {
         return (alpha << 24) | (red << 16) | (green << 8) | blue;
+    }
+
+    public static boolean hasHologram(Claim claim) {
+        HologramManager manager = GriefPrevention.instance.getHologramManager();
+        var hologramOpt = manager.getHologram("claim_" + claim.getID());
+        return hologramOpt.isPresent();
     }
 }
